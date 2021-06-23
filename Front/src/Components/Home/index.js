@@ -20,7 +20,8 @@ class Home extends Component {
         shouldRedirect:false,
         videoWidth:null,
         videoHeight:null,
-        invalidClipUrl:false
+        invalidClipUrl:false,
+        continue:false
     }
     handleVideoUpload = (event) => {
       event.preventDefault();
@@ -106,6 +107,9 @@ class Home extends Component {
        
     }
     getVideoSize=(event)=>{
+        this.setState({
+            continue:true
+        })
         this.setState({
             videoWidth:event.target.videoWidth,
             videoHeight:event.target.videoHeight
@@ -199,7 +203,7 @@ class Home extends Component {
                             
                         </div>
                         {
-                            this.state.videoFilePath
+                            this.state.continue
                             ?
                             <div style={{marginTop:'20px',textAlign:'center'}}>
                             <button onClick={()=>{this.goTemplatePage()}}>
@@ -212,9 +216,6 @@ class Home extends Component {
                        
                     </div>
 
-
-
-                    
                     <div className="container w-container">
                         <div className="w-row">
                             <div className="w-col-4 w-col ">

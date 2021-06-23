@@ -55,13 +55,19 @@ class Preview extends Component {
         })
         console.log('this.props.location.mainVideo')
         console.log(this.props.location.mainVideo)
-        var newHeight=this.props.location.mainVideo.height/(1-this.props.location.query.gamerVideo.height);
+        const ratio = this.props.location.mainVideo.width / this.props.location.faceVideo.width;
+        var newHeight = this.props.location.mainVideo.height / (1 - this.props.location.query.gamerVideo.height);
+        var newY = this.props.location.mainVideo.y - (newHeight - this.props.location.mainVideo.height);
+        // if(newY<0){
 
-        var resizeMainVideo={
-            x:this.props.location.mainVideo.x,
-            y:this.props.location.mainVideo.y-(newHeight-this.props.location.mainVideo.height),
-            height:newHeight,
-            width:this.props.location.mainVideo.width
+        // }
+        // if()
+
+        var resizeMainVideo = {
+            x: this.props.location.mainVideo.x,
+            y: this.props.location.mainVideo.y - (newHeight - this.props.location.mainVideo.height),
+            height: newHeight,
+            width: this.props.location.mainVideo.width
         }
 
         console.log('resizeMainVideo')
@@ -94,56 +100,54 @@ class Preview extends Component {
 
 
     render() {
-        console.log('this.props')
-        console.log(this.props)
-
-        if (this.state.shouldRedirect) {
-            return <Redirect
-                to={{
-                    pathname: 'save',
-                    savedVideo: this.state.savedVideo,
-                }}
-            />
-        }
-
         const prop = this.props.location;
         const winCenterX = window.innerWidth / 2;
         const faceWinCenterY = 100;
+        const sourceRatio = prop.query.mainVideo.height / prop.query.mainVideo.width;
+        const displayPercentInSave = 0.3;
+        const displayPreviewWidth = window.innerWidth * displayPercentInSave;
 
         if (prop.query.gamerVideo) {
             //get ration btw face clip video and main clip Video
-            let ratio = prop.mainVideo.width / prop.faceVideo.width;
+            let faceRatio = displayPreviewWidth / prop.faceVideo.width;
+            let facePreviewWidth = displayPreviewWidth;
+            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.query.gamerVideo.height;
 
-            //zoom the source video by the ratio
-            var totalFaceVideoWidth = prop.videoWidth * ratio;
-            var totalFaceVideoHeight = prop.videoHeight * ratio;
-            var faceVideoHeight = (prop.mainVideo.height * prop.query.gamerVideo.height) / (1 - prop.query.gamerVideo.height);
+            //zoom the source video by the faceRatio
+            var totalFaceVideoWidth = prop.videoWidth * faceRatio;
+            var totalFaceVideoHeight = prop.videoHeight * faceRatio;
 
             //get the clip path of face video
-            var clipTop = prop.faceVideo.y * ratio;
-            var clipLeft = prop.faceVideo.x * ratio;
-            var clipRight = totalFaceVideoWidth - clipLeft - prop.mainVideo.width;
-            var clipBottom = totalFaceVideoHeight - (prop.faceVideo.y * ratio) - faceVideoHeight;
-            console.log('totalFaceVideoHeight')
-            console.log(clipBottom)
+            var clipTop = prop.faceVideo.y * faceRatio;
+            var clipLeft = prop.faceVideo.x * faceRatio;
+            var clipRight = totalFaceVideoWidth - clipLeft - facePreviewWidth;
+            var clipBottom = totalFaceVideoHeight - (prop.faceVideo.y * faceRatio) - facePreviewHeight;
+
 
             //get the magin left value to fix the face video to the center.
-            var faceCenterX = clipLeft + prop.mainVideo.width / 2;
+            var faceCenterX = clipLeft + facePreviewWidth / 2;
             var faceMarginLeft = winCenterX - faceCenterX;
 
             //get the margin bottom value to fix the face video to the top
-            var faceMarginBottom = prop.faceVideo.y * ratio;
+            var faceMarginBottom = prop.faceVideo.y * faceRatio;
 
         }
 
         //get the clip path of main video
-        var mainClipTop = prop.mainVideo.y;
-        var mainClipRight = prop.videoWidth - prop.mainVideo.x - prop.mainVideo.width;
-        var mainClipBottom = prop.videoHeight - prop.mainVideo.y - prop.mainVideo.height;
-        var mainClipLeft = prop.mainVideo.x;
+        let mainRatio = displayPreviewWidth / prop.mainVideo.width;
+
+        //zoom the source video by the mainRatio
+        var totalMainVideoWidth = prop.videoWidth * mainRatio;
+        var totalMainVideoHeight = prop.videoHeight * mainRatio;
+
+        var mainClipTop = prop.mainVideo.y * mainRatio;
+        var mainClipRight = prop.videoWidth * mainRatio - prop.mainVideo.x * mainRatio - prop.mainVideo.width * mainRatio;
+        var mainClipBottom = prop.videoHeight * mainRatio - prop.mainVideo.y * mainRatio - prop.mainVideo.height * mainRatio;
+        var mainClipLeft = prop.mainVideo.x * mainRatio;
+
 
         //get the magin left value to fix the main video to the center.
-        var mainCenterX = prop.mainVideo.x + prop.mainVideo.width / 2;
+        var mainCenterX = prop.mainVideo.x * mainRatio + prop.mainVideo.width * mainRatio / 2;
         var mainMarginLeft = winCenterX - mainCenterX;
 
         //to delete the small gap btw face video and main video
@@ -151,14 +155,26 @@ class Preview extends Component {
         var differ = 5;
         //get the margin bottom value to link the main video to the face video
         if (prop.query.gamerVideo) {
-            console.log('sdfsdf')
-            var mainMarginBottom = prop.mainVideo.y + (totalFaceVideoHeight - faceVideoHeight) + differ;
+            var mainMarginBottom = prop.mainVideo.y * mainRatio + (totalFaceVideoHeight - facePreviewHeight) + differ;
         }
         else
-            var mainMarginBottom = prop.mainVideo.y;
+            var mainMarginBottom = prop.mainVideo.y * mainRatio;
 
-            const totalVideoDivHeight=prop.mainVideo.height+(faceVideoHeight?faceVideoHeight:0);
+        const totalVideoDivHeight = displayPreviewWidth * sourceRatio;
 
+        //redirecting save page after receiving server response.
+        //pass recieved saved video file name and display percent. it is needed for syncronizing 
+        //the size of video in preview page and save page.
+
+        if (this.state.shouldRedirect) {
+            return <Redirect
+                to={{
+                    pathname: 'save',
+                    savedVideo: this.state.savedVideo,
+                    displayPercentInSave
+                }}
+            />
+        }
         return (
             <div>
                 {
@@ -169,7 +185,7 @@ class Preview extends Component {
                         </div>
                         :
                         <div >
-                            <div style={{marginBottom:"30px"}}>
+                            <div style={{ marginBottom: "30px" }}>
                                 <Row>
                                     <Col>
                                         {
@@ -202,7 +218,7 @@ class Preview extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            <div style={{maxHeight:totalVideoDivHeight,overflow:"hidden", width:"fit-content"}}>
+                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden", width: "fit-content" }}>
                                 {
                                     prop.query.gamerVideo
                                         ?
@@ -228,8 +244,8 @@ class Preview extends Component {
                                 <div>
                                     <video
                                         autoPlay
-                                        width={prop.videoWidth}
-                                        height={prop.videoHeight}
+                                        width={totalMainVideoWidth}
+                                        height={totalMainVideoHeight}
                                         src={this.props.location.videoFilePath}
                                         style={{
                                             position: 'relative',
@@ -245,7 +261,7 @@ class Preview extends Component {
 
 
                             </div>
-                            <div style={{textAlign:"center",marginTop:'30px',marginBottom:30}}>
+                            <div style={{ textAlign: "center", marginTop: '30px', marginBottom: 30 }}>
                                 <div>
                                     <Link
                                         to={{
@@ -259,7 +275,7 @@ class Preview extends Component {
                                     >
                                         <button>
                                             Change template
-                                    </button>
+                                        </button>
                                     </Link>
                                     <Link
                                         to={{
@@ -271,7 +287,7 @@ class Preview extends Component {
                                         }} >
                                         <button>
                                             Redo
-                                    </button>
+                                        </button>
                                     </Link>
                                 </div>
                                 <div>

@@ -150,7 +150,7 @@ class Deposit extends Component {
                         createOrder={(data, actions) => this.createOrder(data, actions)}
                         onApprove={(data, actions) => this.onApprove(data, actions)}
                         options={{
-                            clientId: "AZ5C-TuLnZapQG_376bL7_Yj6BXPtaxPsWpfzsBXfkVkFexq83BerY93SWaX7TArjMIjDe7QFWeujTfe"
+                            clientId: "Aegg544wO3m11jblWTgE_9xBk6erCLmdbLrrfrTFkfdniH6xrV9zMK7IvXD499YACCG3E4DliH9AQqBO"
                         }}
                     />
                 </Modal>
