@@ -7,6 +7,7 @@ const templateRoutes = require('./template.route');
 const uploadRoutes = require('./upload.route');
 const paypalRoutes = require('./paypal.route');
 const membershipRoutes = require('./membership.route');
+const socialUploadRoutes = require('./socialUpload.route');
 
 const router = express.Router();
 
@@ -27,5 +28,6 @@ router.use('/template', templateRoutes);
 router.use('/upload', uploadRoutes);
 router.use('/paypal', paypalRoutes);
 router.use('/membership', membershipRoutes);
+router.use('/socialUpload', socialUploadRoutes);
 
 module.exports = router;

@@ -25,24 +25,41 @@ exports.youtube = async (req, res, next) => {
     try {
         console.log('wer')
         const videoPath = path.join(__dirname + './../../public/videos/');
-        var videoUrl = "https://www.youtube.com/watch?v=YSkDtQ2RA_c";
+        const videoUrl = "https://www.youtube.com/watch?v=YSkDtQ2RA_c";
+        console.log('videoUrl')
+        console.log(videoUrl)
         // Create WriteableStream
         const writeableStream = fs.createWriteStream(videoPath+`yt-video.mp4`);
 
         // Listening for the 'finish' event
         writeableStream.on('finish', () => {
+            res.send('ok')
             console.log(`yt-video downloaded successfully`);
-        });
+        })
 
-        ytdl("https://www.youtube.com/watch?v=YSkDtQ2RA_c", {
+        ytdl(videoUrl, {
             format: "mp4",
-        }).pipe(writeableStream);
+        }).pipe(writeableStream)
+       
     } catch (error) {
         return next(error);
     }
 };
 exports.fb = async (req, res, next) => {
+    const fbvid = require('fbvideos');
 
+    const video = 'https://www.facebook.com/107901494866496/videos/322776116233469/';
+    
+    fbvid.low(video).then(vid => {
+      console.log(vid)
+      // => { url: 'https://video.fpat1-1.fna.fbcdn.net/...mp4?934&oe=5972F363' }
+    
+    });
+    
+    fbvid.high(video).then(vid => {
+      console.log(vid);
+      // => { url: 'https://video.fpat1-1.fna.fbcdn.net/...mp4?934&OE=2kf2lf4g' }
+    });
 };
 exports.twitch = async (req, res, next) => {
 
@@ -56,7 +73,7 @@ exports.makeVideo = async (req, res, next) => {
             width: 600,
             height: 1000,
             // audioFilePath:videoPath+'output.mp3',
-            fps: 10,
+            fps: 1,
             allowRemoteRequests: true,
             clips: [
                 {
@@ -247,7 +264,7 @@ exports.thumbnail = async (req, res, next) => {
             width: template.mainVideo.width,
             height: template.mainVideo.height,
             // audioFilePath:videoPath+'output.mp3',
-            fps: 12,
+            fps: 1,
             allowRemoteRequests: true,
             keepSourceAudio: true,
             defaults: {

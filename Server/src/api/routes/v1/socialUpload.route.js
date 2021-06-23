@@ -1,20 +1,14 @@
 const express = require('express');
 const validate = require('express-validation');
-const controller = require('../../controllers/upload.controller');
+const controller = require('../../controllers/socialUpload.controller');
 const { authorize, SUPER_ADMIN, ADMIN, PROVIDER } = require('../../middlewares/auth');
 const router = express.Router();
 
 router
-  .route('/')
-  .post(controller.fileUpload);
-router
+  .route('/googleDrive/:fileName')
+  .get(controller.googleDrive);
+  router
   .route('/youtube')
-  .get(controller.youtube);
-router
-  .route('/fb')
-  .get(controller.fb);
-router
-  .route('/twitch')
-  .get(controller.twitch);
+  .post(controller.youtube);
 
 module.exports = router;
