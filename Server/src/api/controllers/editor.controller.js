@@ -29,7 +29,7 @@ exports.youtube = async (req, res, next) => {
         console.log('videoUrl')
         console.log(videoUrl)
         // Create WriteableStream
-        const writeableStream = fs.createWriteStream(videoPath+`yt-video.mp4`);
+        const writeableStream = fs.createWriteStream(videoPath + `yt-video.mp4`);
 
         // Listening for the 'finish' event
         writeableStream.on('finish', () => {
@@ -40,7 +40,7 @@ exports.youtube = async (req, res, next) => {
         ytdl(videoUrl, {
             format: "mp4",
         }).pipe(writeableStream)
-       
+
     } catch (error) {
         return next(error);
     }
@@ -49,16 +49,16 @@ exports.fb = async (req, res, next) => {
     const fbvid = require('fbvideos');
 
     const video = 'https://www.facebook.com/107901494866496/videos/322776116233469/';
-    
+
     fbvid.low(video).then(vid => {
-      console.log(vid)
-      // => { url: 'https://video.fpat1-1.fna.fbcdn.net/...mp4?934&oe=5972F363' }
-    
+        console.log(vid)
+        // => { url: 'https://video.fpat1-1.fna.fbcdn.net/...mp4?934&oe=5972F363' }
+
     });
-    
+
     fbvid.high(video).then(vid => {
-      console.log(vid);
-      // => { url: 'https://video.fpat1-1.fna.fbcdn.net/...mp4?934&OE=2kf2lf4g' }
+        console.log(vid);
+        // => { url: 'https://video.fpat1-1.fna.fbcdn.net/...mp4?934&OE=2kf2lf4g' }
     });
 };
 exports.twitch = async (req, res, next) => {
@@ -161,8 +161,87 @@ exports.removeVideo = async (req, res, next) => {
         return next(error);
     }
 };
-
 exports.thumbnail = async (req, res, next) => {
+    const videoPath = path.join(__dirname + './../../public/videos/');
+    const videoFilePath = req.body.videoFilePath
+    const template = req.body.template
+    const faceVideo = req.body.faceVideo
+    const mainVideo = req.body.mainVideo
+
+    const editedVideoPath = path.join(__dirname + './../../public/editedVideos/');
+    const editedVideoName = Date.now() + 'Edited.mp4';
+
+
+    if (faceVideo) {
+        var padding = mainVideo.height / (1 - template.gamerVideo.height);
+        var increasedPadding = padding - mainVideo.height;
+
+        var ratio = mainVideo.width / faceVideo.width;
+        var rescaledFaceVideoWidth = faceVideo.width * ratio;
+        var rescaledFaceVideoHeight = faceVideo.height * ratio;
+        ffmpeg()
+            .input(videoFilePath)
+            .complexFilter([
+                {
+                    filter: 'split', options: 2,
+                    outputs: ['a', 'b']
+                },
+                {
+                    filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
+                    inputs: 'a', outputs: 'main'
+                },
+                {
+                    filter: 'pad', options: `${mainVideo.width}:${padding}:0:${increasedPadding}`,
+                    inputs: 'main', outputs: 'padded'
+                },
+                {
+                    filter: "crop", options: { w: faceVideo.width, h: faceVideo.height, x: faceVideo.x, y: faceVideo.y },
+                    inputs: 'b', outputs: 'tempface'
+                },
+                {
+                    filter: "scale", options: { w: rescaledFaceVideoWidth, h: rescaledFaceVideoHeight },
+                    inputs: 'tempface', outputs: 'face'
+                },
+                {
+                    filter: 'overlay', options: { x: template.gamerVideo.x, y: template.gamerVideo.y },
+                    inputs: ['padded', 'face'], outputs: 'output'
+                },
+
+            ])
+
+            .output(editedVideoPath + editedVideoName)
+            .map('output')
+            .on("error", function (er) {
+                console.log("error occured: " + er.message);
+            })
+            .on("end", function () {
+                res.status(httpStatus.OK).json(editedVideoName);
+                console.log("success");
+            })
+            .run();
+    } else {
+        ffmpeg()
+            .input(videoFilePath)
+            .complexFilter([
+                {
+                    filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
+                    outputs: 'main'
+                }
+            ])
+
+            .output(editedVideoPath + editedVideoName)
+            .map('main')
+            .on("error", function (er) {
+                console.log("error occured: " + er.message);
+            })
+            .on("end", function () {
+                res.status(httpStatus.OK).json(editedVideoName);
+                console.log("success");
+            })
+            .run();
+    }
+};
+exports.thumbnail22 = async (req, res, next) => {
     const videoFilePath = req.body.videoFilePath
     const template = req.body.template
     const faceVideo = req.body.faceVideo

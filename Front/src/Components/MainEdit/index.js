@@ -44,7 +44,11 @@ class Edit extends Component {
         var prop = this.props.location;
         const videoRatio = prop.videoHeight / prop.videoWidth;
 
-        const mainVideoRatio = prop.query.mainVideo.height * (1 - prop.query.gamerVideo.height) / prop.query.mainVideo.width;
+        if(prop.query.gamerVideo){
+            var mainVideoRatio = prop.query.mainVideo.height * (1 - prop.query.gamerVideo.height) / prop.query.mainVideo.width;
+        }else{
+            var mainVideoRatio = prop.query.mainVideo.height/ prop.query.mainVideo.width;
+        }
 
         var crop = {};
         if (mainVideoRatio < videoRatio) {
@@ -77,6 +81,8 @@ class Edit extends Component {
 
 
     render() {
+        console.log('this.props')
+        console.log(this.props)
 
 
         return (

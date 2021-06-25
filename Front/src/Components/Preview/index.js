@@ -6,10 +6,17 @@ import { toast } from "react-toastify";
 import { format } from "react-string-format";
 import { Row, Col, Card, Button } from "react-bootstrap";
 
+import socketIOClient from "socket.io-client";
+
+
 import ReactCrop from 'react-image-crop';
 
 import 'react-image-crop/dist/ReactCrop.css';
 import './Preview.css';
+
+const ENDPOINT = "http://localhost:9999";
+   
+
 
 class Preview extends Component {
     constructor(props) {
@@ -17,7 +24,6 @@ class Preview extends Component {
 
     }
     state = {
-
         template: this.props.location.query,
         videoFilePath: this.props.location.videoFilePath,
         videoWidth: this.props.location.videoWidth,
@@ -53,25 +59,7 @@ class Preview extends Component {
         this.setState({
             loading: true
         })
-        console.log('this.props.location.mainVideo')
-        console.log(this.props.location.mainVideo)
-        const ratio = this.props.location.mainVideo.width / this.props.location.faceVideo.width;
-        var newHeight = this.props.location.mainVideo.height / (1 - this.props.location.query.gamerVideo.height);
-        var newY = this.props.location.mainVideo.y - (newHeight - this.props.location.mainVideo.height);
-        // if(newY<0){
 
-        // }
-        // if()
-
-        var resizeMainVideo = {
-            x: this.props.location.mainVideo.x,
-            y: this.props.location.mainVideo.y - (newHeight - this.props.location.mainVideo.height),
-            height: newHeight,
-            width: this.props.location.mainVideo.width
-        }
-
-        console.log('resizeMainVideo')
-        console.log(resizeMainVideo)
 
         axios
             .post(
@@ -94,9 +82,12 @@ class Preview extends Component {
     }
 
     componentDidMount() {
-
-
+        this.socket = socketIOClient();
     }
+    componentWillUnmount(){
+        console.log('unmounted')
+        this.socket.disconnect();
+      }
 
 
     render() {
