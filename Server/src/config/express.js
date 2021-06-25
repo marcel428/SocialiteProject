@@ -6,12 +6,15 @@ const methodOverride = require('method-override');
 const cors = require('cors');
 const helmet = require('helmet');
 const passport = require('passport');
+var twitchStrategy = require("passport-twitch-new").Strategy;
+
 const routes = require('../api/routes/v1');
 const { logs } = require('./vars');
 const strategies = require('./passport');
 const error = require('../api/middlewares/error');
 const fileUpload = require('express-fileupload');
 const path = require('path');
+const { access } = require('fs');
 /**
 * Express instance
 * @public
@@ -53,6 +56,38 @@ app.get('/', function (req, res) {
 app.use(passport.initialize());
 passport.use('jwt', strategies.jwt);
 
+passport.use(new twitchStrategy({
+  clientID: "s4ki7gym2674ymblr0gtubr0q6vn5j",
+  clientSecret: "1frk0x0ihcu2w1j19z7xhjlnlki6ov",
+  callbackURL: "http://18.222.58.119/auth/twitch/callback",
+  scope: "user_read"
+},
+function(accessToken, refreshToken, profile, done) {
+  console.log('accessToken')
+  console.log(accessToken)
+  res.send('ok')
+  // Suppose we are using mongo..
+  // User.findOrCreate({ twitchId: profile.id }, function (err, user) {
+  //   return done(err, user);
+  // });
+}
+));
+
+passport.serializeUser(function(user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function(user, done) {
+  done(null, user);
+});
+
+
+
+app.get("/auth/twitch", passport.authenticate("twitch"));
+app.get("/auth/twitch/callback", passport.authenticate("twitch", { failureRedirect: "/" }), function(req, res) {
+  // Successful authentication, redirect home.
+  res.redirect("/");
+});
 
 // mount api v1 routes
 app.use('/api/v1', routes);

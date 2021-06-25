@@ -71,9 +71,9 @@ exports.makeVideo = async (req, res, next) => {
         const editSpec = {
             outPath: videoPath + 'Editly.mp4',
             width: 600,
-            height: 1000,
+            height: 900,
             // audioFilePath:videoPath+'output.mp3',
-            fps: 1,
+            fps: 24,
             allowRemoteRequests: true,
             clips: [
                 {
@@ -264,7 +264,7 @@ exports.thumbnail = async (req, res, next) => {
             width: template.mainVideo.width,
             height: template.mainVideo.height,
             // audioFilePath:videoPath+'output.mp3',
-            fps: 1,
+            fps: 24,
             allowRemoteRequests: true,
             keepSourceAudio: true,
             defaults: {

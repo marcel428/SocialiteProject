@@ -1,0 +1,11 @@
+[NewRequest]
+Subject = "/CN=www.socialsgonewild.com/C=US/ST=Florida/L=Tampa/O=SociaLiteINC/OU=ExecutiveSuite"
+Exportable = TRUE
+KeyLength = 2048
+KeySpec = 1
+KeyUsage = 0xf0
+MachineKeySet = TRUE
+[RequestAttributes]
+CertificateTemplate="WebServer"
+[Extensions]
+OID=1.3.6.1.5.5.7.3.1

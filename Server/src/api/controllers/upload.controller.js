@@ -44,8 +44,7 @@ exports.youtube = async (req, res, next) => {
     try {
         console.log('wer')
         var videoUrl = req.query.clipUrl;
-        console.log('videoUrl')
-        console.log(videoUrl)
+        
         var rand_no = Date.now();
         const fileName = rand_no + "yt-video.mp4";
         const videoPath = path.join(__dirname + './../../public/uploadedVideos/');
@@ -58,7 +57,7 @@ exports.youtube = async (req, res, next) => {
             res.status(httpStatus.CREATED).json(fileName);
         });
 
-        ytdl("https://www.youtube.com/watch?v=2IW5gFKdsvw", {
+        ytdl("https://www.youtube.com/watch?v=ogF_WMzUqok&html5=1", {
             format: "mp4",
         }).pipe(writeableStream);
     } catch (error) {

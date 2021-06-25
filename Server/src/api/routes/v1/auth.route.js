@@ -5,7 +5,7 @@ const {
   login,
   register,
 } = require('../../validations/auth.validation');
-
+const passport = require('passport');
 const router = express.Router();
 
 /**
@@ -68,6 +68,18 @@ router.route('/register')
  */
 router.route('/login')
   .post(validate(login), controller.login);
+
+router.route('/facebook')
+  .post(controller.facebook);
+
+  router.route('/twitch')
+  .get(passport.authenticate("twitch"));
+
+  router.route('/twitch/callback')
+  .get(passport.authenticate("twitch", { failureRedirect: "/" }), function(req, res) {
+    // Successful authentication, redirect home.
+    res.redirect("/");
+});
 
 
 /**
