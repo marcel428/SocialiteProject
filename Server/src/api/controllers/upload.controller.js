@@ -11,8 +11,7 @@ const APIError = require('../utils/APIError');
 const Template = require('../models/template.model');
 
 
-var fs = require('fs');
-const ytdl = require('ytdl-core');
+
 
 
 /**
@@ -39,17 +38,16 @@ exports.fileUpload = async (req, res) => {
 
 
 };
-exports.youtube = async (req, res, next) => {
+exports.youtube = async (req, res) => {
 
     try {
-        console.log('wer')
-        var videoUrl = req.query.clipUrl;
-        
-        var rand_no = Date.now();
-        const fileName = rand_no + "yt-video.mp4";
         const videoPath = path.join(__dirname + './../../public/uploadedVideos/');
+        const videoUrl = req.query.clipUrl;
+        console.log(req.params.clipUrl)
         // Create WriteableStream
-        const writeableStream = fs.createWriteStream(videoPath + fileName);
+        var rand_no = Date.now();
+        const fileName = rand_no + 'yt-video.mp4';
+        const writeableStream = fs.createWriteStream(videoPath+fileName);
 
         // Listening for the 'finish' event
         writeableStream.on('finish', () => {
@@ -57,7 +55,7 @@ exports.youtube = async (req, res, next) => {
             res.status(httpStatus.CREATED).json(fileName);
         });
 
-        ytdl("https://www.youtube.com/watch?v=ogF_WMzUqok&html5=1", {
+        ytdl(`${videoUrl}`, {
             format: "mp4",
         }).pipe(writeableStream);
     } catch (error) {
@@ -71,14 +69,8 @@ exports.fb = async (req, res) => {
 
 };
 exports.twitch = async (req, res) => {
-    var twitchStreams = require('twitch-get-stream')
-console.log('twitch')
-    twitchStreams.get('https://clips.twitch.tv/RoundDistinctGarbageHassaanChop')
-        .then(function (streams) {
-            console.log('streams')
-            console.log(streams)
-        });
-        res.send('ok');
+
+
 };
 
 

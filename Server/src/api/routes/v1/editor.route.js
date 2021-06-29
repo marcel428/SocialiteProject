@@ -21,6 +21,12 @@ router
   .get(controller.fb);
 
   router
+  .route('/twitch')
+  .get(controller.twitch);
+
+
+
+  router
   .route('/youtube')
   .get(controller.twitch);
 

@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect,useState } from 'react';
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
 import "./Assets/css/app.css";
@@ -8,10 +8,14 @@ import "react-toastify/dist/ReactToastify.css";
 import { Provider } from 'react-redux';
 import Routes from './routes';
 import configureStore from './Store/store/configureStore';
+
+
 const store = configureStore();
 
 const Header = React.lazy(() => import('./Components/Layout/Header'));
 const Footer = React.lazy(() => import('./Components/Layout/Footer'));
+
+
 
 
 

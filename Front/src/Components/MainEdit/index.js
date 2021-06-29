@@ -14,21 +14,22 @@ import './MainEdit.css';
 class Edit extends Component {
     constructor(props) {
         super(props);
-
+        this.videoPlayer = React.createRef();
     }
     state = {
 
-        template: this.props.location.query,
-        videoFilePath: this.props.location.videoFilePath,
-        videoWidth: this.props.location.videoWidth,
-        videoHeight: this.props.location.videoHeight,
+        template: JSON.parse(localStorage.getItem('template')),
+        videoFilePath: localStorage.getItem('videoFilePath'),
+        videoWidth: localStorage.getItem('videoWidth'),
+        videoHeight: localStorage.getItem('videoHeight'),
+        faceVideo: localStorage.getItem('faceVideo') ? JSON.parse(localStorage.getItem('faceVideo')) : null,
         crop: {
             unit: 'px',
-            width: this.props.location.query.mainVideo.width / 2,
-            height: this.props.location.query.mainVideo.height * (1 - (this.props.location.faceVideo ? this.props.location.query.gamerVideo.height : 0)) / 2,
-            aspect: this.props.location.query.mainVideo.width / (this.props.location.query.mainVideo.height * (1 - (this.props.location.faceVideo ? this.props.location.query.gamerVideo.height : 0))),
-            x: (this.props.location.videoWidth - this.props.location.query.mainVideo.width / 2) / 2,
-            y: (this.props.location.query.mainVideo.height * (1 - (this.props.location.faceVideo ? this.props.location.query.gamerVideo.height : 0)) / 2) / 2
+            width: 50,
+            height: 50,
+            aspect: 1,
+            x: 0,
+            y: 0
         },
         shouldRedirect: false,
         previewVideo: '',
@@ -39,15 +40,21 @@ class Edit extends Component {
         this.setState({ crop })
     }
 
+    goToPreview = () => {
+        this.setState({
+            shouldRedirect: true
+        })
+    }
+
     componentDidMount() {
         var divide = 3;
-        var prop = this.props.location;
+        var prop = this.state;
         const videoRatio = prop.videoHeight / prop.videoWidth;
 
-        if(prop.query.gamerVideo){
-            var mainVideoRatio = prop.query.mainVideo.height * (1 - prop.query.gamerVideo.height) / prop.query.mainVideo.width;
-        }else{
-            var mainVideoRatio = prop.query.mainVideo.height/ prop.query.mainVideo.width;
+        if (prop.template.gamerVideo) {
+            var mainVideoRatio = prop.template.mainVideo.height * (1 - prop.template.gamerVideo.height) / prop.template.mainVideo.width;
+        } else {
+            var mainVideoRatio = prop.template.mainVideo.height / prop.template.mainVideo.width;
         }
 
         var crop = {};
@@ -81,9 +88,14 @@ class Edit extends Component {
 
 
     render() {
-        console.log('this.props')
-        console.log(this.props)
 
+        if (this.state.shouldRedirect) {
+            localStorage.setItem('mainVideo', JSON.stringify(this.state.crop));
+            return <Redirect
+                to={{
+                    pathname: `preview`
+                }} />
+        }
 
         return (
             <div>
@@ -136,23 +148,12 @@ class Edit extends Component {
                                     crop={this.state.crop}
                                     keepSelection={true}
                                     onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
-                                    renderComponent={videoComponent(this.props.location.videoFilePath)} />
+                                    renderComponent={videoComponent(this.state.videoFilePath,this.videoPlayer)} />
                             </div>
                             <div style={{ marginTop: '30px', marginBottom: "30px", textAlign: 'center' }}>
-                                <Link to={{
-                                    pathname: 'preview',
-                                    videoFilePath: this.props.location.videoFilePath,
-                                    query: this.props.location.query,
-                                    faceVideo: this.props.location.faceVideo ? this.props.location.faceVideo : null,
-                                    mainVideo: this.state.crop,
-                                    videoWidth: this.props.location.videoWidth,
-                                    videoHeight: this.props.location.videoHeight,
-                                }}
-                                >
-                                    <button>
-                                        Preview
-                                    </button>
-                                </Link>
+                                <button onClick={this.goToPreview}>
+                                    Preview
+                                </button>
 
                             </div>
                         </div>
@@ -169,10 +170,12 @@ class Edit extends Component {
 
 export default Edit;
 
-const videoComponent = (props) => (
+const videoComponent = (props,videoPlayer) => (
 
     <video
-        autoPlay
+    ref={videoPlayer}
+        onLoadedData={() => videoPlayer.current.play()}
+        muted
         loop
         style={{ display: 'block', maxWidth: '100%' }}
         onLoadStart={e => {

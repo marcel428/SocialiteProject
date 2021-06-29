@@ -15,27 +15,33 @@ import 'react-image-crop/dist/ReactCrop.css';
 import './Preview.css';
 
 const ENDPOINT = "http://localhost:9999";
-   
+
 
 
 class Preview extends Component {
     constructor(props) {
         super(props);
-
+        this.videoPlayer = React.createRef();
+        this.videoPlayer_2 = React.createRef();
     }
     state = {
-        template: this.props.location.query,
-        videoFilePath: this.props.location.videoFilePath,
-        videoWidth: this.props.location.videoWidth,
-        videoHeight: this.props.location.videoHeight,
+        template: JSON.parse(localStorage.getItem('template')),
+        videoFilePath: localStorage.getItem('videoFilePath'),
+        videoWidth: localStorage.getItem('videoWidth'),
+        videoHeight: localStorage.getItem('videoHeight'),
+        faceVideo: localStorage.getItem('faceVideo') ? JSON.parse(localStorage.getItem('faceVideo')) : null,
+        mainVideo: JSON.parse(localStorage.getItem('mainVideo')),
         crop: {
             unit: 'px',
             width: 100,
             height: 100,
-            x: (this.props.location.videoWidth - 100) / 2,
-            y: (this.props.location.videoHeight - 100) / 2
+            x: 0,
+            y: 0
         },
         shouldRedirect: false,
+        templateRedirect: false,
+        faceRedirect: false,
+        mainRedirect: false,
         savedVideo: '',
         loading: false,
 
@@ -64,10 +70,10 @@ class Preview extends Component {
         axios
             .post(
                 `${process.env.REACT_APP_API_URL}/editor/thumbnail`, {
-                videoFilePath: this.props.location.videoFilePath,
-                template: this.props.location.query,
-                faceVideo: this.props.location.faceVideo ? this.props.location.faceVideo : null,
-                mainVideo: this.props.location.mainVideo
+                videoFilePath: this.state.videoFilePath,
+                template: this.state.template,
+                faceVideo: this.state.faceVideo ? this.state.faceVideo : null,
+                mainVideo: this.state.mainVideo
             })
             .then((res) => {
                 console.log('res')
@@ -80,29 +86,68 @@ class Preview extends Component {
 
             });
     }
+    goToTemplate=()=>{
+        this.setState({
+            templateRedirect:true
+        })
+    }
+    goToRedo=()=>{
+        if(this.state.faceVideo){
+            this.setState({
+                faceRedirect:true
+            }) 
+            return;
+        }
+        if(!this.state.faceVideo){
+            this.setState({
+                mainRedirect:true
+            }) 
+            return;
+        } 
+    }
 
     componentDidMount() {
-        this.socket = socketIOClient();
+        // this.socket = socketIOClient();
     }
-    componentWillUnmount(){
-        console.log('unmounted')
-        this.socket.disconnect();
-      }
+
 
 
     render() {
-        const prop = this.props.location;
+        if (this.state.templateRedirect) {
+            localStorage.removeItem('faceVideo');
+            localStorage.removeItem('mainVideo');
+            return <Redirect
+                to={{
+                    pathname: `template`
+                }} />
+        }
+        if (this.state.faceRedirect) {
+            localStorage.removeItem('faceVideo');
+            localStorage.removeItem('mainVideo');
+            return <Redirect
+                to={{
+                    pathname: `face-edit`
+                }} />
+        }
+        if (this.state.mainRedirect) {
+            localStorage.removeItem('mainVideo');
+            return <Redirect
+                to={{
+                    pathname: `main-edit`
+                }} />
+        }
+        const prop = this.state;
         const winCenterX = window.innerWidth / 2;
         const faceWinCenterY = 100;
-        const sourceRatio = prop.query.mainVideo.height / prop.query.mainVideo.width;
+        const sourceRatio = prop.template.mainVideo.height / prop.template.mainVideo.width;
         const displayPercentInSave = 0.3;
         const displayPreviewWidth = window.innerWidth * displayPercentInSave;
 
-        if (prop.query.gamerVideo) {
+        if (prop.template.gamerVideo) {
             //get ration btw face clip video and main clip Video
             let faceRatio = displayPreviewWidth / prop.faceVideo.width;
             let facePreviewWidth = displayPreviewWidth;
-            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.query.gamerVideo.height;
+            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.template.gamerVideo.height;
 
             //zoom the source video by the faceRatio
             var totalFaceVideoWidth = prop.videoWidth * faceRatio;
@@ -145,7 +190,7 @@ class Preview extends Component {
         //cos div has a small margin.
         var differ = 5;
         //get the margin bottom value to link the main video to the face video
-        if (prop.query.gamerVideo) {
+        if (prop.template.gamerVideo) {
             var mainMarginBottom = prop.mainVideo.y * mainRatio + (totalFaceVideoHeight - facePreviewHeight) + differ;
         }
         else
@@ -158,11 +203,11 @@ class Preview extends Component {
         //the size of video in preview page and save page.
 
         if (this.state.shouldRedirect) {
+            localStorage.setItem('savedVideo',this.state.savedVideo)
+            localStorage.setItem('displayPercentInSave',displayPercentInSave)
             return <Redirect
                 to={{
                     pathname: 'save',
-                    savedVideo: this.state.savedVideo,
-                    displayPercentInSave
                 }}
             />
         }
@@ -211,14 +256,16 @@ class Preview extends Component {
                             </div>
                             <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden", width: "fit-content" }}>
                                 {
-                                    prop.query.gamerVideo
+                                    prop.template.gamerVideo
                                         ?
                                         <div>
                                             <video
-                                                autoPlay
+                                            muted
+                                            ref={this.videoPlayer}
+                                            onLoadedData={() => this.videoPlayer.current.play()}
                                                 width={totalFaceVideoWidth}
                                                 height={totalFaceVideoHeight}
-                                                src={this.props.location.videoFilePath}
+                                                src={this.state.videoFilePath}
                                                 style={{
                                                     position: 'relative',
                                                     clipPath: `inset(${clipTop}px ${clipRight}px ${clipBottom}px ${clipLeft}px)`,
@@ -234,10 +281,12 @@ class Preview extends Component {
 
                                 <div>
                                     <video
-                                        autoPlay
+                                    muted
+                                     ref={this.videoPlayer_2}
+                                     onLoadedData={() => this.videoPlayer_2.current.play()}
                                         width={totalMainVideoWidth}
                                         height={totalMainVideoHeight}
-                                        src={this.props.location.videoFilePath}
+                                        src={this.state.videoFilePath}
                                         style={{
                                             position: 'relative',
                                             clipPath: `inset(${mainClipTop}px ${mainClipRight}px ${mainClipBottom}px ${mainClipLeft}px)`,
@@ -254,32 +303,12 @@ class Preview extends Component {
                             </div>
                             <div style={{ textAlign: "center", marginTop: '30px', marginBottom: 30 }}>
                                 <div>
-                                    <Link
-                                        to={{
-                                            pathname: "/template",
-                                            state: {
-                                                videoFilePath: prop.videoFilePath,
-                                                videoWidth: prop.videoWidth,
-                                                videoHeight: prop.videoHeight
-                                            }
-                                        }}
-                                    >
-                                        <button>
-                                            Change template
-                                        </button>
-                                    </Link>
-                                    <Link
-                                        to={{
-                                            pathname: prop.query.gamerVideo ? 'face-edit' : 'main-edit',
-                                            query: prop.query,
-                                            videoFilePath: prop.videoFilePath,
-                                            videoWidth: prop.videoWidth,
-                                            videoHeight: prop.videoHeight,
-                                        }} >
-                                        <button>
-                                            Redo
-                                        </button>
-                                    </Link>
+                                    <button onClick={this.goToTemplate}>
+                                        Change Template
+                                    </button>
+                                    <button onClick={this.goToRedo}>
+                                        Redo
+                                    </button>
                                 </div>
                                 <div>
                                     <button onClick={this.sendSelectedVideo}>

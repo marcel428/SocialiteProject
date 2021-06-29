@@ -8,17 +8,6 @@ import { connect } from 'react-redux';
 import { saveAuthInfo } from '../../../Store/actions/actions';
 import { Dropdown, DropdownButton } from "react-bootstrap";
 import { PayPalButton } from "react-paypal-button-v2";
-import * as queryString from 'query-string';
-
-const stringifiedParams = queryString.stringify({
-    client_id: process.env.REACT_APP_FB_APP_ID,
-    redirect_uri: process.env.REACT_APP_MAIN_URL,
-    scope: ['email', 'user_friends'].join(','), // comma seperated string
-    response_type: 'code',
-    auth_type: 'rerequest',
-    display: 'popup',
-});
-const facebookLoginUrl = `https://www.facebook.com/v4.0/dialog/oauth?${stringifiedParams}`;
 
 class Header extends Component {
     constructor(props) {
@@ -29,22 +18,7 @@ class Header extends Component {
         localStorage.removeItem('token');
         this.props.saveAuthInfo(null, null);
     }
-    loginWithFb = () => {
-
-    }
-    loginWithTwitch = () => {
-        axios.
-            get(`${process.env.REACT_APP_API_URL}/auth/twitch`)
-            .then((response) => {
-                console.log('response')
-                console.log(response)
-            }).catch((error) => {
-                console.log(error)
-            });
-    }
     render() {
-        console.log('process.env.REACT_APP_FB_APP_ID')
-        console.log(process.env.REACT_APP_MAIN_URL)
         return (
             <div className="w-nav navigation-bar">
                 <div className="w-container">
@@ -85,20 +59,20 @@ class Header extends Component {
                                     </Dropdown.Item>
                                 </DropdownButton>
                                 :
-                                <DropdownButton id="dropdown-basic-button" title="Login">
-                                    <Dropdown.Item as={Link} to="/login">
-                                        Login
-                                    </Dropdown.Item>
-                                    <Dropdown.Item href={facebookLoginUrl}>
-                                        Login with facebook
-                                    </Dropdown.Item>
-                                    <Dropdown.Item onClick={this.loginWithTwitch}>
-                                        Login with twitch
-                                    </Dropdown.Item>
-                                </DropdownButton>
+                                <Link to="/login" className="w-nav-link">
+                                    Login
+                                </Link>
 
                         }
 
+                        {/* <div className="dropdown">
+                                <span className="dropbtn">Dropdown</span>
+                                <div className="dropdown-content">
+                                    <a href="#">Link 1</a>
+                                    <a href="#">Link 2</a>
+                                    <a href="#">Link 3</a>
+                                </div>
+                            </div> */}
                     </nav>
                 </div>
                 <div>

@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ReactPlayer from 'react-player'
-import  { Redirect } from 'react-router-dom'
+import { Redirect } from 'react-router-dom'
 import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from "react-string-format";
@@ -14,123 +14,121 @@ class Home extends Component {
     constructor(props) {
         super(props);
     }
-    state={
-        videoFilePath:null,
-        clipUrl:'',
-        shouldRedirect:false,
-        videoWidth:null,
-        videoHeight:null,
-        invalidClipUrl:false,
-        continue:false
+    state = {
+        videoFilePath: null,
+        clipUrl: '',
+        shouldRedirect: false,
+        videoWidth: null,
+        videoHeight: null,
+        invalidClipUrl: false,
+        continue: false
     }
     handleVideoUpload = (event) => {
-      event.preventDefault();
-      console.log('event.target.files')
-      var file=event.target.files;
-      const formData = new FormData();
-      formData.append('myfile',file[0]);
-      const config = {
-          headers: {
-              'content-type': 'multipart/form-data'
-          }
-      };
-
-      axios.
-      post(`${process.env.REACT_APP_API_URL}/upload`,formData,config)
-          .then((response) => {
-            this.setState({
-                videoFilePath:`${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
-            })
-          }).catch((error) => {
-              console.log(error)
-      });
-           
+        event.preventDefault();
+        console.log('event.target.files')
+        var file = event.target.files;
+        const formData = new FormData();
+        formData.append('myfile', file[0]);
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
         };
-    changeClipUrl=(event)=>{
-        this.setState({
-            clipUrl:event.target.value
-        })
-    }
-    uploadClipByUrl=()=>{
-        const ytPattern = this.state.clipUrl.indexOf('youtube.com/watch') ;
-        const fbPattern = this.state.clipUrl.indexOf('https://www.facebook.com/') ;
-        const ttPattern = this.state.clipUrl.indexOf('twitch.tv') ;
 
-        if(ytPattern!=-1){
+        axios.
+            post(`${process.env.REACT_APP_API_URL}/upload`, formData, config)
+            .then((response) => {
+                this.setState({
+                    videoFilePath: `${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
+                })
+            }).catch((error) => {
+                console.log(error)
+            });
+
+    };
+    changeClipUrl = (event) => {
+        this.setState({
+            clipUrl: event.target.value
+        })
+    }
+    uploadClipByUrl = () => {
+        const ytPattern = this.state.clipUrl.indexOf('youtube.com/watch');
+        const fbPattern = this.state.clipUrl.indexOf('https://www.facebook.com/');
+        const ttPattern = this.state.clipUrl.indexOf('twitch.tv');
+
+        if (ytPattern != -1) {
             axios.
-            get(`${process.env.REACT_APP_API_URL}/upload/youtube?clipUrl=${this.state.clipUrl}`)
+                get(`${process.env.REACT_APP_API_URL}/upload/youtube?clipUrl=${this.state.clipUrl}`)
                 .then((response) => {
-                  this.setState({
-                      videoFilePath:`${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
-                  })
+                    this.setState({
+                        videoFilePath: `${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
+                    })
                 }).catch((error) => {
                     console.log(error)
-            });
+                });
         }
-        if(fbPattern!=-1){
+        if (fbPattern != -1) {
             axios.
-            post(`${process.env.REACT_APP_API_URL}/upload/fb`,{
-                clipUrl:this.state.clipUrl
-            })
+                post(`${process.env.REACT_APP_API_URL}/upload/fb`, {
+                    clipUrl: this.state.clipUrl
+                })
                 .then((response) => {
-                  this.setState({
-                      videoFilePath:`${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
-                  })
+                    this.setState({
+                        videoFilePath: `${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
+                    })
                 }).catch((error) => {
                     console.log(error)
-            });
+                });
         }
-        if(ttPattern!=-1){
+        if (ttPattern != -1) {
             axios.
-            post(`${process.env.REACT_APP_API_URL}/upload/twitch`,{
-                clipUrl:this.state.clipUrl
-            })
+                post(`${process.env.REACT_APP_API_URL}/upload/twitch`, {
+                    clipUrl: this.state.clipUrl
+                })
                 .then((response) => {
-                  this.setState({
-                      videoFilePath:`${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
-                  })
+                    this.setState({
+                        videoFilePath: `${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
+                    })
                 }).catch((error) => {
                     console.log(error)
-            });
+                });
         }
-        if(ytPattern ==-1 && fbPattern==-1 && ttPattern==-1){
+        if (ytPattern == -1 && fbPattern == -1 && ttPattern == -1) {
             this.setState({
-                invalidClipUrl:true
+                invalidClipUrl: true
             })
         }
-    
+
     }
-    goTemplatePage=()=>{
+    goTemplatePage = () => {
         this.setState({
-            shouldRedirect:true
+            shouldRedirect: true
         })
-       
+
     }
-    getVideoSize=(event)=>{
+    getVideoSize = (event) => {
         this.setState({
-            continue:true
+            continue: true
         })
         this.setState({
-            videoWidth:event.target.videoWidth,
-            videoHeight:event.target.videoHeight
+            videoWidth: event.target.videoWidth,
+            videoHeight: event.target.videoHeight
         })
     }
     render() {
 
-        if( this.state.shouldRedirect){
+        if (this.state.shouldRedirect) {
+            localStorage.setItem('videoFilePath',this.state.videoFilePath)
+            localStorage.setItem('videoWidth',this.state.videoWidth)
+            localStorage.setItem('videoHeight',this.state.videoHeight)
             return <Redirect
-            to={{
-                pathname: "/template",
-                state: { 
-                    videoFilePath: this.state.videoFilePath,
-                    videoWidth: this.state.videoWidth,
-                    videoHeight: this.state.videoHeight
-                 }
-              }}   />
+                to={{
+                    pathname: `template`
+                }} />
         }
         return (
-                <div>
-                   
+            <div>
+
 
                 <div className="hero-section centered">
                     <div className="w-container">
@@ -142,78 +140,79 @@ class Home extends Component {
                                 THE WORLDS #1 VIDEO EDITOR FOR CONTENT CREATORS
                             </strong>
                         </div>
-                        
-                        
+
+
                         <div className="text-block">
                             {
                                 this.state.invalidClipUrl
-                                ?
-                            <div style={{
-                                backgroundColor:"white", color:'red',
-                                width:"70%", marginLeft:'11%',
-                                textAlign:"left", padding:'10px'}}>
-                                <div>
-                                Error Invalid url! Make sure the url looks like any of these:
-                                </div>
-                                <div>
-                                http://www.youtube.com/watch?v=aqz-KE-bpKQ or
-                                </div>
-                                <div>
-                                https://www.facebook.com/ZLaner/videos/1206095443166908 or
-                                </div>
-                                <div>
-                                https://www.twitch.tv/tosjo/clip/RoundDistinctGarbageHassaanChop or                             
-                                </div>
-                                <div>
-                                https://clips.twitch.tv/RoundDistinctGarbageHassaanChop
-                                </div>
-                                
-                            </div>
-                            :
-                            null
-                            }  
-                            
+                                    ?
+                                    <div style={{
+                                        backgroundColor: "white", color: 'red',
+                                        width: "70%", marginLeft: '11%',
+                                        textAlign: "left", padding: '10px'
+                                    }}>
+                                        <div>
+                                            Error Invalid url! Make sure the url looks like any of these:
+                                        </div>
+                                        <div>
+                                            http://www.youtube.com/watch?v=aqz-KE-bpKQ or
+                                        </div>
+                                        <div>
+                                            https://www.facebook.com/ZLaner/videos/1206095443166908 or
+                                        </div>
+                                        <div>
+                                            https://www.twitch.tv/tosjo/clip/RoundDistinctGarbageHassaanChop or
+                                        </div>
+                                        <div>
+                                            https://clips.twitch.tv/RoundDistinctGarbageHassaanChop
+                                        </div>
+
+                                    </div>
+                                    :
+                                    null
+                            }
+
                             <div>
-                                    <input type="text"
+                                <input type="text"
                                     onChange={(e) => { this.changeClipUrl(e) }}
-                                    style={{width:'70%', marginRight:'3%'}} 
-                                    placeholder="clip url"  />
-                                    <button onClick={()=>{this.uploadClipByUrl()}}>Clip</button> 
-                            </div>                                    
-                                           
+                                    style={{ width: '70%', marginRight: '3%' }}
+                                    placeholder="clip url" />
+                                <button onClick={() => { this.uploadClipByUrl() }}>Clip</button>
+                            </div>
+
                         </div>
 
-                        <div style={{marginTop:'20px', alignItems:'center'}}>
-                            <input type="file"  onChange={(e) => { this.handleVideoUpload(e) }} />
+                        <div style={{ marginTop: '20px', alignItems: 'center' }}>
+                            <input type="file" onChange={(e) => { this.handleVideoUpload(e) }} />
                         </div>
-                        <div style={{marginTop:'20px'}}>
+                        <div style={{ marginTop: '20px' }}>
 
-                        <video
-                            style={{marginRight:"auto", marginLeft:"auto"}}
-                            autoPlay
-                            controls
-                            width="50%"
-                            height="50%"
-                            src={this.state.videoFilePath}
-                            onLoadedMetadata={e => {
-                                this.getVideoSize(e)                                
-                              }}
+                            <video
+                                style={{ marginRight: "auto", marginLeft: "auto" }}
+                                autoPlay
+                                controls
+                                width="50%"
+                                height="50%"
+                                src={this.state.videoFilePath}
+                                onLoadedMetadata={e => {
+                                    this.getVideoSize(e)
+                                }}
                             >
-                        </video>
-                            
+                            </video>
+
                         </div>
                         {
                             this.state.continue
-                            ?
-                            <div style={{marginTop:'20px',textAlign:'center'}}>
-                            <button onClick={()=>{this.goTemplatePage()}}>
-                                Continue
-                            </button>
-                            </div>
-                            :
-                            null
+                                ?
+                                <div style={{ marginTop: '20px', textAlign: 'center' }}>
+                                    <button onClick={() => { this.goTemplatePage() }}>
+                                        Continue
+                                    </button>
+                                </div>
+                                :
+                                null
                         }
-                       
+
                     </div>
 
                     <div className="container w-container">
@@ -225,7 +224,7 @@ class Home extends Component {
                                     </div>
                                     <h3>
                                         CLIP
-                            </h3>
+                                    </h3>
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
                                 </div>
                             </div>
@@ -236,7 +235,7 @@ class Home extends Component {
                                     </div>
                                     <h3>
                                         CLIP
-                            </h3>
+                                    </h3>
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
                                 </div>
                             </div>
@@ -247,7 +246,7 @@ class Home extends Component {
                                     </div>
                                     <h3>
                                         CLIP
-                            </h3>
+                                    </h3>
                                     <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse varius enim in eros elementum tristique.</p>
                                 </div>
                             </div>
@@ -255,14 +254,14 @@ class Home extends Component {
                     </div>
                     <a href="#" className="button-2 w-button">
                         START YOUR FREE TRIAL
-                </a>
+                    </a>
 
                 </div>
                 <div className="section accent">
                     <div className="w-container">
                         <div className="section-title-group">
                             <h2 className="section-heading centered white">
-                            HOW IT WORKS(video below we will add)
+                                HOW IT WORKS(video below we will add)
                             </h2>
                             <div className="section-subheading center off-white">
 
@@ -287,7 +286,7 @@ class Home extends Component {
                             <span className="text-span">
                                 <strong>
                                     <em>
-                                    12.99/mo. unlimited usage 
+                                        12.99/mo. unlimited usage
                                     </em>
                                 </strong>
                             </span>
@@ -295,20 +294,20 @@ class Home extends Component {
                             -
                             <span>
                                 <strong>
-                                Tik Tok aspect ratio made easy
-                            
-                                <br />
-                                -Facecam cropping
-                                <br />
-                                -Access to all templates
-                                <br />
-                                -Instant Access to Twitch, Facebook, or YouTube clips
-                                <br />
-                                -1,000,000+ GIF Images
-                                <br />
-                                -Ability to post directly to TikTok, Instagram, and YouTube
-                                <br />
-                                -Up to 1GB per edit
+                                    Tik Tok aspect ratio made easy
+
+                                    <br />
+                                    -Facecam cropping
+                                    <br />
+                                    -Access to all templates
+                                    <br />
+                                    -Instant Access to Twitch, Facebook, or YouTube clips
+                                    <br />
+                                    -1,000,000+ GIF Images
+                                    <br />
+                                    -Ability to post directly to TikTok, Instagram, and YouTube
+                                    <br />
+                                    -Up to 1GB per edit
                                 </strong>
                             </span>
                             <strong>
@@ -322,7 +321,7 @@ class Home extends Component {
                             <span className="text-span">
                                 <strong>
                                     <em>
-                                    19.99/mo. unlimited usage 
+                                        19.99/mo. unlimited usage
                                     </em>
                                 </strong>
                             </span>
@@ -330,24 +329,24 @@ class Home extends Component {
                             -
                             <span>
                                 <strong>
-                                -Tik Tok aspect ratio made easy
-                            
-                                <br />
-                                -Facecam cropping
-                                <br />
-                                -Access to all templates
-                                <br />
-                                -Instant Access to Twitch, Facebook, or YouTube clips
-                                <br />
-                                -1,000,000+ GIF Images
-                                <br />
-                                -Ability to post directly to TikTok, Instagram, and YouTube
+                                    -Tik Tok aspect ratio made easy
+
+                                    <br />
+                                    -Facecam cropping
+                                    <br />
+                                    -Access to all templates
+                                    <br />
+                                    -Instant Access to Twitch, Facebook, or YouTube clips
+                                    <br />
+                                    -1,000,000+ GIF Images
+                                    <br />
+                                    -Ability to post directly to TikTok, Instagram, and YouTube
                                 </strong>
                             </span>
                             <br />
                             <strong>
                                 <em className="italic-text">
-                                -Up to 4GB per edit
+                                    -Up to 4GB per edit
                                 </em>
                             </strong>
                             <span>
@@ -358,15 +357,15 @@ class Home extends Component {
                                 </strong>
                             </span>
                             <br />
-                            
+
                         </p>
                         <a href="#" className="w-button">
-                        SIGN ME UP!
+                            SIGN ME UP!
                         </a>
 
                     </div>
                 </section>
-                </div>
+            </div>
 
 
 

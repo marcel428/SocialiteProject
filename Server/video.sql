@@ -11,7 +11,7 @@
  Target Server Version : 40406
  File Encoding         : 65001
 
- Date: 19/06/2021 01:38:59
+ Date: 11/06/2021 21:24:11
 */
 
 
@@ -100,28 +100,6 @@ db.getCollection("admins").insert([ {
 } ]);
 
 // ----------------------------
-// Collection structure for memberships
-// ----------------------------
-db.getCollection("memberships").drop();
-db.createCollection("memberships");
-
-// ----------------------------
-// Documents of memberships
-// ----------------------------
-db.getCollection("memberships").insert([ {
-    _id: ObjectId("60c9eb4014780000b3006cec"),
-    name: "free",
-    description: "ratio made easily",
-    price: 0
-} ]);
-db.getCollection("memberships").insert([ {
-    _id: ObjectId("60c9eb7014780000b3006ced"),
-    name: "premium",
-    description: "premium membership",
-    price: 10
-} ]);
-
-// ----------------------------
 // Collection structure for patients
 // ----------------------------
 db.getCollection("patients").drop();
@@ -190,7 +168,7 @@ db.getCollection("templates").insert([ {
         height: 0.3
     },
     mainVideo: {
-        width: 900,
+        width: 700,
         height: 1200
     }
 } ]);
@@ -235,18 +213,40 @@ db.getCollection("users").createIndex({
     background: true,
     unique: true
 });
+db.getCollection("users").createIndex({
+    firstName: NumberInt("1")
+}, {
+    name: "firstName_1",
+    background: true
+});
+db.getCollection("users").createIndex({
+    lastName: NumberInt("1")
+}, {
+    name: "lastName_1",
+    background: true
+});
+db.getCollection("users").createIndex({
+    cmp: NumberInt("1")
+}, {
+    name: "cmp_1",
+    background: true,
+    unique: true
+});
+db.getCollection("users").createIndex({
+    room: NumberInt("1")
+}, {
+    name: "room_1",
+    background: true,
+    unique: true
+});
+db.getCollection("users").createIndex({
+    phoneNumber: NumberInt("1")
+}, {
+    name: "phoneNumber_1",
+    background: true,
+    unique: true
+});
 
 // ----------------------------
 // Documents of users
 // ----------------------------
-db.getCollection("users").insert([ {
-    _id: ObjectId("60c82ada5a00f53e1847ad60"),
-    balance: NumberInt("970"),
-    membership: "premium",
-    name: "sdfsdf",
-    email: "sdf@sdf.com",
-    password: "$2a$10$fucxxcR5SQzdSP1Q8j/Ire1ig87fgWZnsopN.RcJxHYpM24.E2rZa",
-    createdAt: ISODate("2021-06-15T04:21:46Z"),
-    updatedAt: ISODate("2021-06-16T14:38:58Z"),
-    __v: NumberInt("0")
-} ]);

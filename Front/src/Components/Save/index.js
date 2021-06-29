@@ -5,7 +5,6 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from "react-string-format";
 import { Dropdown, DropdownButton } from "react-bootstrap";
-import { connect } from 'react-redux';
 
 
 import ReactCrop from 'react-image-crop';
@@ -18,36 +17,22 @@ import { saveAs } from 'file-saver';
 class Save extends Component {
     constructor(props) {
         super(props);
+        this.videoPlayer = React.createRef();
 
     }
     state = {
-        shouldRedirect: false
+        savedVideo: localStorage.getItem('savedVideo'),
+        displayPercentInSave: localStorage.getItem('displayPercentInSave'),
+        shouldRedirect: false,
+        url: null,
+        authed: false
     }
     uploadGoogleDrive = () => {
         axios
             .get(
-                `${process.env.REACT_APP_API_URL}/socialUpload/googleDrive/${this.props.location.savedVideo}`)
+                `${process.env.REACT_APP_API_URL}/googleDrive/upload`)
             .then((res) => {
                 if (res.status == 200) {
-                    alert('video is uploaded successfully!')
-                    this.setState({
-                        shouldRedirect: true,
-                    })
-                }
-            }).catch((error) => {
-                console.log(error)
-            });
-    }
-    uploadYoutube = () => {
-        axios
-            .post(
-                `${process.env.REACT_APP_API_URL}/socialUpload/youtube`,{
-                    userId:this.props.auth.user.id,
-                    fileName:this.props.location.savedVideo
-                })
-            .then((res) => {
-                if (res.status == 200) {
-                    alert('video is uploaded successfully!')
                     this.setState({
                         shouldRedirect: true,
                     })
@@ -58,17 +43,68 @@ class Save extends Component {
     }
     download = () => {
         saveAs(
-            `${process.env.REACT_APP_PUBLIC_URL}/editedVideos/${this.props.location.savedVideo}`,
-            this.props.location.savedVideo
+            `${process.env.REACT_APP_PUBLIC_URL}/editedVideos/${this.state.savedVideo}`,
+            this.state.savedVideo
         )
+    }
+    goToHome = () => {
+        this.setState({
+            shouldRedirect: true
+        })
+    }
+    componentDidMount() {
+        axios
+            .get(
+                `${process.env.REACT_APP_API_URL}/googleDrive/?fileName=${this.state.savedVideo}`)
+            .then((res) => {
+                if (res.status == 200) {
+                    console.log('res')
+                    console.log(res)
+                    if (res.data.authed) {
+                        this.setState({
+                            authed: true
+                        })
+                    } else {
+                        this.setState({
+                            url: res.data.url,
+                            authed: false
+                        })
+                    }
+
+                }
+            }).catch((error) => {
+                console.log(error)
+            });
     }
 
     render() {
-        console.log('this.props')
-
-        console.log(this.props)
 
         if (this.state.shouldRedirect) {
+            if (localStorage.getItem('faceVideo')) {
+                localStorage.removeItem('faceVideo')
+            }
+            if (localStorage.getItem('mainVideo')) {
+                localStorage.removeItem('mainVideo')
+            }
+            if (localStorage.getItem('savedVideo')) {
+                localStorage.removeItem('savedVideo')
+            }
+            if (localStorage.getItem('template')) {
+                localStorage.removeItem('template')
+            }
+            if (localStorage.getItem('videoFilePath')) {
+                localStorage.removeItem('videoFilePath')
+            }
+            if (localStorage.getItem('videoHeight')) {
+                localStorage.removeItem('videoHeight')
+            }
+            if (localStorage.getItem('videoWidth')) {
+                localStorage.removeItem('videoWidth')
+            }
+            if (localStorage.getItem('displayPercentInSave')) {
+                localStorage.removeItem('displayPercentInSave')
+            }
+
             return <Redirect
                 to={{
                     pathname: '/',
@@ -77,19 +113,24 @@ class Save extends Component {
         }
 
         return (
+
             <div>
                 <div style={{ display: 'flex', width: "100%" }}>
 
                     {
-                        this.props.location.savedVideo
+                        this.state.savedVideo
                             ?
                             <video
+                                muted
+                                playsInline 
+                                ref={this.videoPlayer}
+                                onLoadedData={() => {
+                                    this.videoPlayer.current.play();
+                                }}
                                 style={{ marginRight: "auto", marginLeft: "auto" }}
                                 autoPlay
                                 controls
-                                width={`${this.props.location.displayPercentInSave * 100}%`}
-                                height={`${this.props.location.displayPercentInSave * 100}%`}
-                                src={`${process.env.REACT_APP_PUBLIC_URL}/editedVideos/${this.props.location.savedVideo}`}
+                                src={`${process.env.REACT_APP_PUBLIC_URL}/editedVideos/${this.state.savedVideo}`}
                             >
                             </video>
                             :
@@ -97,33 +138,33 @@ class Save extends Component {
                     }
                 </div>
                 <div style={{ textAlign: 'center', padding: "30px" }}>
-                    <Link to="/">
-                        <button>
-                            go to home
-                        </button>
-                    </Link>
+
+                    <button onClick={this.goToHome}>
+                        go to home
+                    </button>
+
                 </div>
                 <div>
                     <button onClick={this.download}>
                         download
                     </button>
                     <DropdownButton id="dropdown-basic-button" title="upload">
-                        <Dropdown.Item onClick={this.uploadGoogleDrive}>
-                            Google drive
-                        </Dropdown.Item>
                         {
-                            this.props.auth.user&&this.props.auth.user.id
+                            !this.state.authed
                                 ?
-                                <Dropdown.Item onClick={this.uploadYoutube}>
-                                    Youtube
-                                </Dropdown.Item>
+                                <a href={this.state.url}>
+                                    Google drive
+                                </a>
                                 :
-                                null
+                                <button onClick={this.uploadGoogleDrive}>
+                                    Google drive
+                                </button>
                         }
+
 
                     </DropdownButton>
                 </div>
-            </div>
+            </div >
 
 
 
@@ -131,9 +172,5 @@ class Save extends Component {
         )
     }
 }
-const mapStateToProps = state => ({
-    auth: state.auth
-});
 
-
-export default connect(mapStateToProps)(Save)
+export default Save;

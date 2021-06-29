@@ -9,10 +9,8 @@ const Culqi = require('culqi-node');
 const { culqiConfing } = require('../../config/vars');
 const bcrypt = require('bcryptjs');
 const jwt = require('jwt-simple');
-const queryString = require('query-string');
 
-var passport = require("passport");
-var twitchStrategy = require("passport-twitch-new").Strategy;
+
 /**
  * Returns a formated object with tokens
  * @private
@@ -35,14 +33,16 @@ function generateTokenResponse(user, accessToken) {
  */
 exports.register = async (req, res) => {
   try {
+    console.log('sdf');
+    console.log(req.body)
     const userData = req.body;
-    if (userData.email)
+    if(userData.email)
 
-      var existEmail = await User.findOne({ email: userData.email });
+    var existEmail=await User.findOne({email:userData.email});
 
-    if (existEmail) {
+    if(existEmail){
       return res.json({ error: 'email is duplicated', status: httpStatus.CONFLICT });
-    } else {
+    }else{
       const user = await new User(userData).save();
       const userTransformed = user.transform();
       const token = user.token();
@@ -63,50 +63,21 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body;
     // validate
     if (!email || !password)
-      return res.json({ error: 'Not all fields have been entered.', status: httpStatus.BAD_REQUEST });
+    return res.json({ error: 'Not all fields have been entered.', status: httpStatus.BAD_REQUEST });
 
     const user = await User.findOne({ email: email });
     if (!user)
-      return res.json({ error: 'No account with this email has been registered.', status: httpStatus.BAD_REQUEST });
+    return res.json({ error: 'No account with this email has been registered.', status: httpStatus.BAD_REQUEST });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch)
-      return res.json({ error: 'Invalid credentials.', status: httpStatus.BAD_REQUEST });
+    if (!isMatch) 
+    return res.json({ error: 'Invalid credentials.', status: httpStatus.BAD_REQUEST });
 
     const token = user.token();
     console.log('token')
     console.log(token)
     const userTransformed = user.transform();
     res.json({ token, user: userTransformed, status: httpStatus.CREATED });
-  } catch (error) {
-    console.log("error", error);
-    res.status(500).json({ error: error.message });
-    return next(error)
-  }
-};
-
-exports.facebook = async (req, res, next) => {
-  try {
-    const stringifiedParams = queryString.stringify({
-      client_id: process.env.FB_APP_ID,
-      redirect_uri: process.env.BASE_URL,
-      scope: ['email', 'user_friends'].join(','), // comma seperated string
-      response_type: 'code',
-      auth_type: 'rerequest',
-      display: 'popup',
-    });
-    const facebookLoginUrl = `https://www.facebook.com/v4.0/dialog/oauth?${stringifiedParams}`;
-  } catch (error) {
-    console.log("error", error);
-    res.status(500).json({ error: error.message });
-    return next(error)
-  }
-};
-
-exports.twitch = async (req, res, next) => {
-  try {
-    console.log('wer');
-    res.redirect("/");
   } catch (error) {
     console.log("error", error);
     res.status(500).json({ error: error.message });

@@ -11,14 +11,13 @@ const { google } = require('googleapis');
 
 
 class GoogleDriveService {
-  constructor(clientId, clientSecret, redirectUri, refreshToken) {
-    this.driveClient = this.createDriveClient(clientId, clientSecret, redirectUri, refreshToken);
+  constructor(client) {
+    this.driveClient = this.createDriveClient(client);
+    console.log('this.driveClient')
+    console.log(this.driveClient)
   }
 
-  createDriveClient(clientId, clientSecret, redirectUri, refreshToken) {
-    const client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
-
-    client.setCredentials({ refresh_token: refreshToken });
+  createDriveClient(client) {
 
     return google.drive({
       version: 'v3',

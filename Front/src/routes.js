@@ -1,11 +1,12 @@
 import React, { Suspense } from 'react';
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route,Router } from "react-router-dom";
 import "./Assets/css/app.css";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { connect } from 'react-redux';
+import { createBrowserHistory } from "history";
 import fb from "./Components/FB";
 
 
@@ -25,6 +26,8 @@ const Membership = React.lazy(() => import('./Components/Membership'));
 const Login = React.lazy(() => import('./Components/Auth/Login'));
 const Register = React.lazy(() => import('./Components/Auth/Register'));
 
+export const history = createBrowserHistory();
+
 toast.configure();
 
 const Routes = (props) => {
@@ -36,7 +39,7 @@ const Routes = (props) => {
             {
                     <Switch>
                         <Route exact path="/" component={Home} />
-                        <Route exact path="/template" component={Template} />
+                        <Route  path="/template" component={Template} />
                         <Route exact path="/face-edit" component={FaceEdit} />
                         <Route exact path="/main-edit" component={MainEdit} />
                         <Route exact path="/preview" component={Preview} />

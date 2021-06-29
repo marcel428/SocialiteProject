@@ -5,6 +5,8 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from "react-string-format";
 import { Row, Col, Card, Button } from "react-bootstrap";
+import { connect } from 'react-redux';
+
 
 import "./Template.css";
 var ss = [];
@@ -14,7 +16,9 @@ class Template extends Component {
     }
     state = {
         templates: [],
-        linkKey: []
+        linkKey: [],
+        shouldRedirect: false,
+        selectedTmp: {}
     }
     componentDidMount() {
         axios
@@ -35,6 +39,12 @@ class Template extends Component {
             linkKey: ss
         })
     }
+    goToEdit = (item) => {
+        this.setState({
+            shouldRedirect: true,
+            selectedTmp: item
+        })
+    }
 
     render() {
         console.log('this.props')
@@ -42,6 +52,13 @@ class Template extends Component {
         console.log('this.state')
         console.log(this.state)
 
+        if (this.state.shouldRedirect) {
+            localStorage.setItem('template', JSON.stringify(this.state.selectedTmp));
+            return <Redirect
+                to={{
+                    pathname: this.state.selectedTmp.gamerVideo ? 'face-edit' : 'main-edit',
+                }} />
+        }
 
         return (
             <div style={{ paddingLeft: "5%", paddingRight: "5%", paddingTop: "50px", paddingBottom: "50px" }}>
@@ -71,6 +88,7 @@ class Template extends Component {
                                         }}
                                     >
                                     </video>
+                                    
                                     <div>
                                         {item.description}
                                     </div>
@@ -78,19 +96,9 @@ class Template extends Component {
                                         this.state.linkKey[idx]
                                             ?
                                             <div style={{ textAlign: 'center' }}>
-                                                <Link
-                                                    to={{
-                                                        pathname: item.gamerVideo ? 'face-edit' : 'main-edit',
-                                                        query: item,
-                                                        videoFilePath: this.props.location.state.videoFilePath,
-                                                        videoWidth: this.props.location.state.videoWidth,
-                                                        videoHeight: this.props.location.state.videoHeight,
-                                                    }} >
-
-                                                    <button>
-                                                        Select Template
-                                                    </button>
-                                                </Link>
+                                                <button onClick={()=>this.goToEdit(item)}>
+                                                    Select Template
+                                                </button>
 
                                             </div>
                                             :
@@ -110,5 +118,9 @@ class Template extends Component {
         )
     }
 }
+const mapStateToProps = state => ({
+    auth: state.auth
+});
 
-export default Template;
+
+export default connect(mapStateToProps)(Template)
