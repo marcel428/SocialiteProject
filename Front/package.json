@@ -33,7 +33,7 @@
     "react-twitch-embed-video": "^3.0.0",
     "react-youtube": "^7.13.1",
     "reactstrap": "^8.9.0",
-    "socket.io-client": "^4.1.2",
+    "socket.io-client": "^4.0.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {

@@ -6,7 +6,9 @@ const {
 } = require('./../../config/vars');
 const server = app.listen(socketPort);
 const socketIo = require('socket.io');
-const io = socketIo.listen(server);
+const io = socketIo(server,
+  { cors: { origin: process.env.BASE_URL } }
+);
 const User = require('./../models/user.model');
 const editor = require('./editor.controller');
 const logger = require('../../config/logger')
@@ -19,19 +21,24 @@ logger.info("Start socket server: " + socketPort)
 let interval;
 
 io.on("connection", (socket) => {
-  console.log("New client connected");
+  console.log("New client connected: "+socket.id);
   if (interval) {
     clearInterval(interval);
   }
-  interval = setInterval(() => getApiAndEmit(socket), 1000);
+
+  //when progress bar starts, socket send the editing status constantly.
+
+  socket.on('start', (data) => {
+    console.log(data);
+    interval = setInterval(() => getApiAndEmit(socket), 1000);
+  })
   socket.on("disconnect", () => {
-    console.log("Client disconnected");
+    console.log("Client disconnected: "+socket.id);
     clearInterval(interval);
   });
 });
 
 const getApiAndEmit = socket => {
-  const response = new Date();
   // Emitting a new message. Will be consumed by the client
-  socket.emit("FromAPI", response);
+  socket.emit("progressStatus", editor.progressStatus);
 };

@@ -4,7 +4,7 @@ import { Redirect, Link } from 'react-router-dom'
 import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from "react-string-format";
-import { Row, Col, Card, Button } from "react-bootstrap";
+import { Row, Col, Card, Button, ProgressBar } from "react-bootstrap";
 
 import socketIOClient from "socket.io-client";
 
@@ -14,15 +14,13 @@ import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import './Preview.css';
 
-const ENDPOINT = "http://localhost:9999";
-
 
 
 class Preview extends Component {
     constructor(props) {
         super(props);
-        this.videoPlayer = React.createRef();
         this.videoPlayer_2 = React.createRef();
+        this.videoPlayer = React.createRef();
     }
     state = {
         template: JSON.parse(localStorage.getItem('template')),
@@ -56,6 +54,8 @@ class Preview extends Component {
         faceMarginBottom: '',
         totalVideoWidth: '',
         totalVideoHeight: '',
+        io: '',
+        progress: 0
 
     }
     handleCrop = (crop, percentCrop) => {
@@ -65,8 +65,7 @@ class Preview extends Component {
         this.setState({
             loading: true
         })
-
-
+        this.socket.emit('start', 'progressing is started...');
         axios
             .post(
                 `${process.env.REACT_APP_API_URL}/editor/thumbnail`, {
@@ -78,36 +77,56 @@ class Preview extends Component {
             .then((res) => {
                 console.log('res')
                 console.log(res)
+                this.socket.disconnect();
+
                 this.setState({
-                    loading: false,
-                    shouldRedirect: true,
+                    progress: 100,
                     savedVideo: res.data
                 })
 
             });
     }
-    goToTemplate=()=>{
+    goToTemplate = () => {
         this.setState({
-            templateRedirect:true
+            templateRedirect: true
         })
     }
-    goToRedo=()=>{
-        if(this.state.faceVideo){
+    goToRedo = () => {
+        if (this.state.faceVideo) {
             this.setState({
-                faceRedirect:true
-            }) 
+                faceRedirect: true
+            })
             return;
         }
-        if(!this.state.faceVideo){
+        if (!this.state.faceVideo) {
             this.setState({
-                mainRedirect:true
-            }) 
+                mainRedirect: true
+            })
             return;
-        } 
+        }
     }
 
     componentDidMount() {
-        // this.socket = socketIOClient();
+        this.socket = socketIOClient(process.env.REACT_APP_SOCKET_ENDPOINT);
+        this.socket.on('progressStatus', (data) => {
+            this.setState({
+                progress: data
+            })
+        })
+    }
+    componentDidUpdate() {
+        if (this.state.progress == 100) {
+            setTimeout(this.setLoading, 1000);
+        }
+    }
+    componentWillUnmount() {
+        this.socket.disconnect();
+    }
+    setLoading = () => {
+        this.setState({
+            loading: false,
+            shouldRedirect: true,
+        })
     }
 
 
@@ -143,10 +162,19 @@ class Preview extends Component {
         const displayPercentInSave = 0.3;
         const displayPreviewWidth = window.innerWidth * displayPercentInSave;
 
+        /*********************************************************************************************************
+                                             
+                                              *****************
+
+                                            if gamer video exists
+
+                                              *****************
+
+        *********************************************************************************************************/
         if (prop.template.gamerVideo) {
-            //get ration btw face clip video and main clip Video
-            let faceRatio = displayPreviewWidth / prop.faceVideo.width;
-            let facePreviewWidth = displayPreviewWidth;
+            //get ratio btw face clip video and main clip Video
+            var faceRatio = displayPreviewWidth * prop.template.gamerVideo.width / prop.faceVideo.width;
+            var facePreviewWidth = displayPreviewWidth * prop.template.gamerVideo.width;
             var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.template.gamerVideo.height;
 
             //zoom the source video by the faceRatio
@@ -165,9 +193,20 @@ class Preview extends Component {
             var faceMarginLeft = winCenterX - faceCenterX;
 
             //get the margin bottom value to fix the face video to the top
+
             var faceMarginBottom = prop.faceVideo.y * faceRatio;
 
         }
+
+        /*********************************************************************************************************
+                                             
+                                              *****************
+                                              
+                                                Main Video
+
+                                              *****************
+
+        *********************************************************************************************************/
 
         //get the clip path of main video
         let mainRatio = displayPreviewWidth / prop.mainVideo.width;
@@ -190,34 +229,72 @@ class Preview extends Component {
         //cos div has a small margin.
         var differ = 5;
         //get the margin bottom value to link the main video to the face video
-        if (prop.template.gamerVideo) {
+        if (prop.template.name == "split") {
             var mainMarginBottom = prop.mainVideo.y * mainRatio + (totalFaceVideoHeight - facePreviewHeight) + differ;
-        }
-        else
+        } else
             var mainMarginBottom = prop.mainVideo.y * mainRatio;
 
-        const totalVideoDivHeight = displayPreviewWidth * sourceRatio;
+        if (prop.template.name == "smallfacecam" || prop.template.name == "square") {
+            faceMarginBottom = prop.faceVideo.y * faceRatio + (totalMainVideoHeight * (1 - prop.template.gamerVideo.y));
+        }
+
+
+        var totalVideoDivHeight = displayPreviewWidth * sourceRatio;
+
+        /*********************************************************************************************************
+                                     
+                                                *****************
+                                                
+                                                    if template is "blurred"
+
+                                                *****************
+
+        *********************************************************************************************************/
+
+        // if (prop.template.name == "blurred") {
+        //     var srcRatio=prop.videoHeight/prop.videoWidth;
+        //     var blurRatio=prop.template.mainVideo.height/prop.template.mainVideo.width;
+        //     var ratioW = displayPreviewWidth / prop.mainVideo.width;
+        //     var ratioH = ratioW*blurRatio / prop.template.realHeight;
+        //     var blurPreW = displayPreviewWidth;
+        //     var blurPreH = displayPreviewWidth*blurRatio / prop.template.realHeight;
+        //     var totalBlurW = prop.videoWidth * ratioH;
+        //     var totalBlurH = prop.videoHeight * ratioH;
+        //     var blurClipTop = prop.mainVideo.y * ratioH;
+        //     var blurClipRight = totalBlurW - prop.mainVideo.x * ratioH - blurPreW;
+        //     var blurClipBottom = totalBlurH - prop.mainVideo.y * ratioH - blurPreH;
+        //     var blurClipLeft = prop.mainVideo.x * ratioH;
+
+        //     var BlurCenterX = prop.mainVideo.x * ratioH + blurPreW / 2;
+        //     var blurMarginLeft = winCenterX - BlurCenterX;
+        //     var blurMarginBottom=blurClipTop;
+
+        //     totalVideoDivHeight=blurPreH;
+        // }
+
 
         //redirecting save page after receiving server response.
         //pass recieved saved video file name and display percent. it is needed for syncronizing 
         //the size of video in preview page and save page.
 
         if (this.state.shouldRedirect) {
-            localStorage.setItem('savedVideo',this.state.savedVideo)
-            localStorage.setItem('displayPercentInSave',displayPercentInSave)
+            localStorage.setItem('savedVideo', this.state.savedVideo)
+            localStorage.setItem('displayPercentInSave', displayPercentInSave)
             return <Redirect
                 to={{
                     pathname: 'save',
                 }}
             />
         }
+        console.log('this.state')
+        console.log(this.state)
         return (
             <div>
                 {
                     this.state.loading
                         ?
-                        <div>
-                            Wait a second
+                        <div style={{ width: '100%', justifyContent: 'center' }}>
+                            <ProgressBar now={this.state.progress} label={`${this.state.progress}%`} style={{ width: '100%' }} />
                         </div>
                         :
                         <div >
@@ -254,15 +331,115 @@ class Preview extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden", width: "fit-content" }}>
+                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden", width: "fit-content" }} >
                                 {
-                                    prop.template.gamerVideo
+                                    prop.template.name == "split"
                                         ?
                                         <div>
                                             <video
+                                                muted
+                                                ref={this.videoPlayer}
+                                                onLoadedData={() => this.videoPlayer.current.play()}
+                                                width={totalFaceVideoWidth}
+                                                height={totalFaceVideoHeight}
+                                                src={this.state.videoFilePath}
+                                                style={{
+                                                    position: 'relative',
+                                                    clipPath: `inset(${clipTop}px ${clipRight}px ${clipBottom}px ${clipLeft}px)`,
+                                                    left: faceMarginLeft,
+                                                    bottom: faceMarginBottom
+                                                }}
+                                            >
+                                            </video>
+                                            <video
+                                                muted
+                                                ref={this.videoPlayer_2}
+                                                onLoadedData={() => this.videoPlayer_2.current.play()}
+                                                width={totalMainVideoWidth}
+                                                height={totalMainVideoHeight}
+                                                src={this.state.videoFilePath}
+                                                style={{
+                                                    position: 'relative',
+                                                    clipPath: `inset(${mainClipTop}px ${mainClipRight}px ${mainClipBottom}px ${mainClipLeft}px)`,
+                                                    left: mainMarginLeft,
+                                                    bottom: mainMarginBottom
+                                                }}
+                                            >
+
+                                            </video>
+                                        </div>
+                                        : null
+                                }
+                                {
+                                    prop.template.name == "fullscreen"
+                                        ?
+                                        <video
                                             muted
-                                            ref={this.videoPlayer}
-                                            onLoadedData={() => this.videoPlayer.current.play()}
+                                            ref={this.videoPlayer_2}
+                                            onLoadedData={() => this.videoPlayer_2.current.play()}
+                                            width={totalMainVideoWidth}
+                                            height={totalMainVideoHeight}
+                                            src={this.state.videoFilePath}
+                                            style={{
+                                                position: 'relative',
+                                                clipPath: `inset(${mainClipTop}px ${mainClipRight}px ${mainClipBottom}px ${mainClipLeft}px)`,
+                                                left: mainMarginLeft,
+                                                bottom: mainMarginBottom
+                                            }}
+                                        >
+
+                                        </video>
+                                        :
+                                        null
+                                }
+                                {/* {
+                                    prop.template.name == "blurred"
+                                        ?
+                                        <video
+                                            muted
+                                            ref={this.videoPlayer_2}
+                                            onLoadedData={() => this.videoPlayer_2.current.play()}
+                                            width={totalBlurW}
+                                            height={totalBlurH}
+                                            src={this.state.videoFilePath}
+                                            style={{
+                                                position: 'relative',
+                                                clipPath: `inset(${blurClipTop}px ${blurClipRight}px ${blurClipBottom}px ${blurClipLeft}px)`,
+                                                left: blurMarginLeft,
+                                                bottom: blurMarginBottom
+                                            }}
+                                        >
+
+                                        </video>
+                                        :
+                                        null
+                                } */}
+
+                                {
+                                    prop.template.name == "smallfacecam" || prop.template.name == "square"
+                                        ?
+                                        <div>
+
+
+                                            <video
+                                                muted
+                                                ref={this.videoPlayer_2}
+                                                onLoadedData={() => this.videoPlayer_2.current.play()}
+                                                width={totalMainVideoWidth}
+                                                height={totalMainVideoHeight}
+                                                src={this.state.videoFilePath}
+                                                style={{
+                                                    position: 'relative',
+                                                    clipPath: `inset(${mainClipTop}px ${mainClipRight}px ${mainClipBottom}px ${mainClipLeft}px)`,
+                                                    left: mainMarginLeft,
+                                                    bottom: mainMarginBottom
+                                                }}
+                                            >
+                                            </video>
+                                            <video
+                                                muted
+                                                ref={this.videoPlayer}
+                                                onLoadedData={() => this.videoPlayer.current.play()}
                                                 width={totalFaceVideoWidth}
                                                 height={totalFaceVideoHeight}
                                                 src={this.state.videoFilePath}
@@ -275,30 +452,8 @@ class Preview extends Component {
                                             >
                                             </video>
                                         </div>
-                                        :
-                                        null
+                                        : null
                                 }
-
-                                <div>
-                                    <video
-                                    muted
-                                     ref={this.videoPlayer_2}
-                                     onLoadedData={() => this.videoPlayer_2.current.play()}
-                                        width={totalMainVideoWidth}
-                                        height={totalMainVideoHeight}
-                                        src={this.state.videoFilePath}
-                                        style={{
-                                            position: 'relative',
-                                            clipPath: `inset(${mainClipTop}px ${mainClipRight}px ${mainClipBottom}px ${mainClipLeft}px)`,
-                                            left: mainMarginLeft,
-                                            bottom: mainMarginBottom
-                                        }}
-                                    >
-
-                                    </video>
-                                </div>
-
-
 
                             </div>
                             <div style={{ textAlign: "center", marginTop: '30px', marginBottom: 30 }}>

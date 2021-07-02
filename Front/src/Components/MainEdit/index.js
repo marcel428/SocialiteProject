@@ -51,9 +51,9 @@ class Edit extends Component {
         var prop = this.state;
         const videoRatio = prop.videoHeight / prop.videoWidth;
 
-        if (prop.template.gamerVideo) {
+        if(prop.template.name=="split"){
             var mainVideoRatio = prop.template.mainVideo.height * (1 - prop.template.gamerVideo.height) / prop.template.mainVideo.width;
-        } else {
+        }else{
             var mainVideoRatio = prop.template.mainVideo.height / prop.template.mainVideo.width;
         }
 

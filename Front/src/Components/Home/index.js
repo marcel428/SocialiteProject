@@ -2,13 +2,7 @@ import React, { Component } from "react";
 import ReactPlayer from 'react-player'
 import { Redirect } from 'react-router-dom'
 import axios from "axios";
-import { toast } from "react-toastify";
-import { format } from "react-string-format";
 import "./Home.css";
-import { whiteBox } from "../../Constants/images"
-import { ReactComponent as YourSvg } from '../../Assets/images/white-box.svg';
-import sdf from '../../Assets/images/white-box.svg';
-import { Row, Col, Card, Button } from "react-bootstrap";
 
 class Home extends Component {
     constructor(props) {
@@ -24,8 +18,6 @@ class Home extends Component {
         continue: false
     }
     handleVideoUpload = (event) => {
-        event.preventDefault();
-        console.log('event.target.files')
         var file = event.target.files;
         const formData = new FormData();
         formData.append('myfile', file[0]);

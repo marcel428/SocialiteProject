@@ -68,7 +68,7 @@ class Template extends Component {
                         this.state.templates && this.state.templates
                             ?
                             this.state.templates.map((item, idx) => (
-                                <Col xs="4" style={{ textAlign: 'center', backgroundColor: 'white' }} key={item._id}>
+                                <Col xs="4" style={{ textAlign: 'center', backgroundColor: 'white',marginTop:"40px" }} key={item._id}>
                                     <div style={{ padding: "10px" }}>
                                         <div>
                                             <span style={{ marginRight: '10px' }}>{item.name}</span>

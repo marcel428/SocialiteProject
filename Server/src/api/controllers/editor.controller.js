@@ -19,7 +19,8 @@ const ytdl = require('ytdl-core');
 let clients = [];
 let facts = [];
 
-progressStatus = 0;
+var progressStatus = 0;
+
 
 /**
  * Load user and append to req.
@@ -45,17 +46,27 @@ exports.youtube = async (req, res, next) => {
     }
 };
 exports.thumbnail = async (req, res, next) => {
+
+    // estimated duration of output in milliseconds
+    const durationEstimate = 1000
+
+    const logProgress = (progress,event) => {
+        // progress is a floating point number from 0 to 1
+        console.log('progress',event.percent);
+        exports.progressStatus = Math.floor(event.percent);
+    }
+
     const videoPath = path.join(__dirname + './../../public/videos/');
     const videoFilePath = req.body.videoFilePath
     const template = req.body.template
+    console
     const faceVideo = req.body.faceVideo
     const mainVideo = req.body.mainVideo
 
     const editedVideoPath = path.join(__dirname + './../../public/editedVideos/');
     const editedVideoName = Date.now() + 'Edited.mp4';
 
-
-    if (faceVideo) {
+    if (template.name == 'split') {
         var padding = mainVideo.height / (1 - template.gamerVideo.height);
         var increasedPadding = padding - mainVideo.height;
 
@@ -82,7 +93,7 @@ exports.thumbnail = async (req, res, next) => {
                     inputs: 'b', outputs: 'tempface'
                 },
                 {
-                    filter: "scale", options: { w: rescaledFaceVideoWidth, h: rescaledFaceVideoHeight },
+                    filter: "scale", options: { w: rescaledFaceVideoWidth - 1, h: rescaledFaceVideoHeight },
                     inputs: 'tempface', outputs: 'face'
                 },
                 {
@@ -97,12 +108,14 @@ exports.thumbnail = async (req, res, next) => {
             .on("error", function (er) {
                 console.log("error occured: " + er.message);
             })
+            .on('progress', ffmpegOnProgress(logProgress, durationEstimate))
             .on("end", function () {
                 res.status(httpStatus.OK).json(editedVideoName);
                 console.log("success");
             })
             .run();
-    } else {
+    }
+    if (template.name == "fullscreen") {
         ffmpeg()
             .input(videoFilePath)
             .complexFilter([
@@ -117,14 +130,56 @@ exports.thumbnail = async (req, res, next) => {
             .on("error", function (er) {
                 console.log("error occured: " + er.message);
             })
+            .on('progress', ffmpegOnProgress(logProgress, durationEstimate))
             .on("end", function () {
                 res.status(httpStatus.OK).json(editedVideoName);
                 console.log("success");
             })
             .run();
     }
+    if (template.name == 'smallfacecam' || template.name == 'square') {
+        var widthRatio = mainVideo.width / faceVideo.width;
+        var heightRatio = mainVideo.height / faceVideo.height;
+        var rescaledFaceVideoWidth = faceVideo.width * widthRatio * template.gamerVideo.width;
+        var rescaledFaceVideoHeight = faceVideo.height * heightRatio * template.gamerVideo.height;
+        ffmpeg()
+            .input(videoFilePath)
+            .complexFilter([
+                {
+                    filter: 'split', options: 2,
+                    outputs: ['a', 'b']
+                },
+                {
+                    filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
+                    inputs: 'a', outputs: 'main'
+                },
+                {
+                    filter: "crop", options: { w: faceVideo.width, h: faceVideo.height, x: faceVideo.x, y: faceVideo.y },
+                    inputs: 'b', outputs: 'tempface'
+                },
+                {
+                    filter: "scale", options: { w: rescaledFaceVideoWidth, h: rescaledFaceVideoHeight },
+                    inputs: 'tempface', outputs: 'face'
+                },
+                {
+                    filter: 'overlay', options: { x: template.gamerVideo.x * mainVideo.width, y: template.gamerVideo.y * mainVideo.height },
+                    inputs: ['main', 'face'], outputs: 'output'
+                },
 
+            ])
 
+            .output(editedVideoPath + editedVideoName)
+            .map('output')
+            .on("error", function (er) {
+                console.log("error occured: " + er.message);
+            })
+            .on('progress', ffmpegOnProgress(logProgress, durationEstimate))
+            .on("end", function () {
+                res.status(httpStatus.OK).json(editedVideoName);
+                console.log("success");
+            })
+            .run();
+    }
 
 };
 exports.twitch = async (req, res, next) => {
@@ -133,7 +188,8 @@ exports.twitch = async (req, res, next) => {
     const logProgress = (progress, event) => {
 
         // progress is a floating point number from 0 to 1
-        console.log('progress', (progress * 100).toFixed())
+        console.log('progress', (progress * 100).toFixed());
+        progressStatus = progress * 100;
 
     }
 

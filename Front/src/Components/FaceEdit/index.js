@@ -50,7 +50,7 @@ class Edit extends Component {
         var prop = this.state;
         const videoRatio = prop.videoHeight / prop.videoWidth;
 
-        const faceVideoRatio = prop.template.mainVideo.height * prop.template.gamerVideo.height / prop.template.mainVideo.width;
+        const faceVideoRatio = prop.template.mainVideo.height * prop.template.gamerVideo.height / (prop.template.mainVideo.width*prop.template.gamerVideo.width);
 
         var crop = {};
         if (faceVideoRatio < videoRatio) {
