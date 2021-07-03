@@ -331,11 +331,11 @@ class Preview extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden", width: "fit-content" }} >
+                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden"}} >
                                 {
                                     prop.template.name == "split"
                                         ?
-                                        <div>
+                                        <div style={{display:"grid"}}>
                                             <video
                                                 muted
                                                 ref={this.videoPlayer}
@@ -418,9 +418,7 @@ class Preview extends Component {
                                 {
                                     prop.template.name == "smallfacecam" || prop.template.name == "square"
                                         ?
-                                        <div>
-
-
+                                        <div style={{display:"grid"}}>
                                             <video
                                                 muted
                                                 ref={this.videoPlayer_2}

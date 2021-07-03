@@ -59,7 +59,6 @@ exports.thumbnail = async (req, res, next) => {
     const videoPath = path.join(__dirname + './../../public/videos/');
     const videoFilePath = req.body.videoFilePath
     const template = req.body.template
-    console
     const faceVideo = req.body.faceVideo
     const mainVideo = req.body.mainVideo
 
