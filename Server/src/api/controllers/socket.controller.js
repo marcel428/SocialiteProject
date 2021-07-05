@@ -7,7 +7,11 @@ const {
 const server = app.listen(socketPort);
 const socketIo = require('socket.io');
 const io = socketIo(server,
-  { cors: { origin: process.env.BASE_URL } }
+  {
+    cors: {
+      origin: '*',
+    }
+  }
 );
 const User = require('./../models/user.model');
 const editor = require('./editor.controller');
@@ -21,7 +25,7 @@ logger.info("Start socket server: " + socketPort)
 let interval;
 
 io.on("connection", (socket) => {
-  console.log("New client connected: "+socket.id);
+  console.log("New client connected: " + socket.id);
   if (interval) {
     clearInterval(interval);
   }
@@ -33,7 +37,7 @@ io.on("connection", (socket) => {
     interval = setInterval(() => getApiAndEmit(socket), 1000);
   })
   socket.on("disconnect", () => {
-    console.log("Client disconnected: "+socket.id);
+    console.log("Client disconnected: " + socket.id);
     clearInterval(interval);
   });
 });
