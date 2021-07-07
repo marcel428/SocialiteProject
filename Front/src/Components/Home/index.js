@@ -3,6 +3,7 @@ import ReactPlayer from 'react-player'
 import { Redirect } from 'react-router-dom'
 import axios from "axios";
 import "./Home.css";
+import {get,set,del,clear,keys } from "./../../Service/idb";
 
 class Home extends Component {
     constructor(props) {
@@ -10,34 +11,71 @@ class Home extends Component {
     }
     state = {
         videoFilePath: null,
+        videoFileName: '',
+        videoBase64: '',
         clipUrl: '',
         shouldRedirect: false,
         videoWidth: null,
         videoHeight: null,
         invalidClipUrl: false,
-        continue: false
+        continue: false,
+        database:null
     }
-    handleVideoUpload = (event) => {
-        var file = event.target.files;
-        const formData = new FormData();
-        formData.append('myfile', file[0]);
-        const config = {
-            headers: {
-                'content-type': 'multipart/form-data'
-            }
-        };
+    handleVideoUpload = async (event) => {
+        var file = event.target.files[0];
+        console.log('file')
+        console.log(file)
+        if(!file){
+            return;
+        }
+        var result = await this.convertFileToBase64(file);
 
-        axios.
-            post(`${process.env.REACT_APP_API_URL}/upload`, formData, config)
-            .then((response) => {
-                this.setState({
-                    videoFilePath: `${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
-                })
-            }).catch((error) => {
-                console.log(error)
-            });
+
+        //save video in the idb(indexDB)
+        clear();
+        await set('videoBase64',result.base64);
+
+        this.setState({
+            videoFilePath: URL.createObjectURL(file),
+            videoFileName: result.fileName,
+            videoBase64: result.base64
+        })
+        // const formData = new FormData();
+        // formData.append('myfile', file[0]);
+        // const config = {
+        //     headers: {
+        //         'content-type': 'multipart/form-data'
+        //     }
+        // };
+
+        // axios.
+        //     post(`${process.env.REACT_APP_API_URL}/upload`, formData, config)
+        //     .then((response) => {
+        //         console.log('response')
+        //         console.log(response)
+        //         this.setState({
+        //             videoFilePath: `${process.env.REACT_APP_PUBLIC_URL}/uploadedVideos/${response.data}`
+        //         })
+        //     }).catch((error) => {
+        //         console.log(error)
+        //     });
 
     };
+
+    convertFileToBase64 = files => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader()
+            console.log('files');
+            console.log(files);
+            reader.readAsDataURL(files);
+            reader.onload = () => resolve({
+                fileName: files.name,
+                base64: reader.result
+            });
+            reader.onerror = reject;
+        });
+
+    }
     changeClipUrl = (event) => {
         this.setState({
             clipUrl: event.target.value
@@ -107,12 +145,22 @@ class Home extends Component {
             videoHeight: event.target.videoHeight
         })
     }
+    componentDidMount() {
+      
+    }
     render() {
-
         if (this.state.shouldRedirect) {
-            localStorage.setItem('videoFilePath',this.state.videoFilePath)
-            localStorage.setItem('videoWidth',this.state.videoWidth)
-            localStorage.setItem('videoHeight',this.state.videoHeight)
+
+
+
+            console.log('this.state');
+            console.log(this.state);
+
+            localStorage.setItem('videoFilePath', this.state.videoFilePath)
+            localStorage.setItem('videoFileName', this.state.videoFileName)
+            localStorage.setItem('videoWidth', this.state.videoWidth)
+            localStorage.setItem('videoHeight', this.state.videoHeight)
+            localStorage.setItem('realVideo', JSON.stringify(this.state.realVideo))
             return <Redirect
                 to={{
                     pathname: `template`

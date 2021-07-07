@@ -34,23 +34,60 @@ class Edit extends Component {
         },
         shouldRedirect: false,
         faceVideoRatio: null,
+        templateRedirect: false
     }
     handleCrop = (crop, percentCrop) => {
+      //when the selected faceVideo ratio is the same as with mainVideo ratio * 0.7(limited value),
+      //stop increasing the ratio
+        var diffBtwTemplateAndCrop=0.7;
+        var mainRatio=this.state.template.mainVideo.height/this.state.template.mainVideo.width;
+        var selectedRatio=crop.height/crop.width;
+        if(selectedRatio>mainRatio*diffBtwTemplateAndCrop){
+            return;
+        }
+
+        // *****************************
+
         this.setState({
             crop
         })
     }
-    goToMain=()=>{
+    goToMain = () => {
         this.setState({
-            shouldRedirect:true
+            shouldRedirect: true
+        })
+    }
+    goToTemplate = () => {
+        this.setState({
+            templateRedirect: true
+        })
+    }
+    _4_3Facecam = () => {
+        this.initialCrop();
+    }
+    freeTransform = () => {
+        var divide = 3;
+        var state=this.state;
+        var crop={
+            unit:'px',
+            width:state.videoWidth/divide,
+            height:state.videoHeight/divide,
+            x:(state.videoWidth-state.videoWidth/divide)/2,
+            y:(state.videoHeight-state.videoHeight/divide)/2
+        }
+        this.setState({
+            crop
         })
     }
     componentDidMount() {
+        this.initialCrop();
+    }
+    initialCrop = () => {
         var divide = 3;
         var prop = this.state;
         const videoRatio = prop.videoHeight / prop.videoWidth;
 
-        const faceVideoRatio = prop.template.mainVideo.height * prop.template.gamerVideo.height / (prop.template.mainVideo.width*prop.template.gamerVideo.width);
+        const faceVideoRatio = prop.template.mainVideo.height * prop.template.gamerVideo.height / (prop.template.mainVideo.width * prop.template.gamerVideo.width);
 
         var crop = {};
         if (faceVideoRatio < videoRatio) {
@@ -82,9 +119,18 @@ class Edit extends Component {
 
 
     render() {
+        console.log('this.state')
+        console.log(this.state)
+        if (this.state.templateRedirect) {
+            localStorage.removeItem('template');
+            return <Redirect
+                to={{
+                    pathname: `template`
+                }} />
+        }
 
         if (this.state.shouldRedirect) {
-            localStorage.setItem('faceVideo',JSON.stringify(this.state.crop));
+            localStorage.setItem('faceVideo', JSON.stringify(this.state.crop));
             return <Redirect
                 to={{
                     pathname: `main-edit`
@@ -115,13 +161,33 @@ class Edit extends Component {
                         crop={this.state.crop}
                         keepSelection={true}
                         onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
-                        renderComponent={videoComponent(this.state.videoFilePath,this.videoPlayer)} />
+                        renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
                 </div>
+                {
+                    this.state.template.name == "split" || this.state.template.name == "square"
+                        ?
+                        <div style={{ marginTop: "20px" }}>
+                            <button onClick={this._4_3Facecam}>
+                                4:3 facecam
+                            </button>
+                            <button style={{ marginLeft: '20px' }} onClick={this.freeTransform}>
+                                free transform
+                            </button>
+                        </div>
+                        :
+                        null
+                }
+
                 <div style={{ marginTop: '30px', marginBottom: "30px", textAlign: 'center' }}>
                     <button onClick={this.goToMain}>
-                            Done
+                        Done
                     </button>
 
+                </div>
+                <div>
+                    <button onClick={this.goToTemplate}>
+                        Change Template
+                    </button>
                 </div>
             </div>
 
@@ -133,12 +199,12 @@ class Edit extends Component {
 
 export default Edit;
 
-const videoComponent = (props,videoPlayer) => (
+const videoComponent = (props, videoPlayer) => (
 
     <video
-    ref={videoPlayer}
-    muted
-    onLoadedData={() => videoPlayer.current.play()}
+        ref={videoPlayer}
+        muted
+        onLoadedData={() => videoPlayer.current.play()}
         loop
         style={{ display: 'block', maxWidth: '100%' }}
         onLoadStart={e => {

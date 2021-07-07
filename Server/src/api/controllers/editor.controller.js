@@ -47,33 +47,60 @@ exports.youtube = async (req, res, next) => {
 };
 exports.thumbnail = async (req, res, next) => {
 
+    //FIRST file uploading
+
+    const file = req.files.myfile;
+
+    var rand_no = Date.now();
+    const fileName = rand_no + file.name;
+    const filePath = path.join(__dirname + './../../public/uploadedVideos/');
+
+    var uploading = await file.mv(filePath + fileName);
+
+
+    //AFTER UPLOADING, edit video...
+
     // estimated duration of output in milliseconds
     const durationEstimate = 1000
 
-    const logProgress = (progress,event) => {
+    const logProgress = (progress, event) => {
         // progress is a floating point number from 0 to 1
-        console.log('progress',event.percent);
-        exports.progressStatus = Math.floor(event.percent);
+        console.log('progress', event.percent);
+        exports.progressStatus = Math.floor(event.percent?event.percent:1);
     }
 
-    const videoPath = path.join(__dirname + './../../public/videos/');
-    const videoFilePath = req.body.videoFilePath
-    const template = req.body.template
-    const faceVideo = req.body.faceVideo
-    const mainVideo = req.body.mainVideo
+    const template = JSON.parse(req.body.template);
+    const faceVideo = JSON.parse(req.body.faceVideo);
+    const mainVideo = JSON.parse(req.body.mainVideo)
+
 
     const editedVideoPath = path.join(__dirname + './../../public/editedVideos/');
     const editedVideoName = Date.now() + 'Edited.mp4';
 
-    if (template.name == 'split') {
+    if (template.name == 'split') {     
+        //when selecting the faceVideo using free transfor, we had do add ratio
+        // btw selected facevideo / template face video
+
+        var templateFaceVideoRatio=
+        (template.mainVideo.height*template.gamerVideo.height)
+        /
+        (template.mainVideo.width*template.gamerVideo.width);
+        var clipVideoRatio=faceVideo.height/faceVideo.width;
+
+        var ratioBtwClipAndTemplate=clipVideoRatio/templateFaceVideoRatio;
+
+        //******************************* */
+
         var padding = mainVideo.height / (1 - template.gamerVideo.height);
         var increasedPadding = padding - mainVideo.height;
 
+        var heightRatio = 1 / (1 - (template.gamerVideo.height*(ratioBtwClipAndTemplate<1?ratioBtwClipAndTemplate:1)));
+
         var ratio = mainVideo.width / faceVideo.width;
-        var rescaledFaceVideoWidth = faceVideo.width * ratio;
+        var rescaledFaceVideoWidth = mainVideo.width;
         var rescaledFaceVideoHeight = faceVideo.height * ratio;
         ffmpeg()
-            .input(videoFilePath)
+            .input(filePath + fileName)
             .complexFilter([
                 {
                     filter: 'split', options: 2,
@@ -84,7 +111,7 @@ exports.thumbnail = async (req, res, next) => {
                     inputs: 'a', outputs: 'main'
                 },
                 {
-                    filter: 'pad', options: `${mainVideo.width}:${padding}:0:${increasedPadding}`,
+                    filter: 'pad', options: `iw:${heightRatio}*ih:ow-iw:oh-ih`,
                     inputs: 'main', outputs: 'padded'
                 },
                 {
@@ -92,7 +119,7 @@ exports.thumbnail = async (req, res, next) => {
                     inputs: 'b', outputs: 'tempface'
                 },
                 {
-                    filter: "scale", options: { w: rescaledFaceVideoWidth - 1, h: rescaledFaceVideoHeight },
+                    filter: "scale", options: { w: rescaledFaceVideoWidth + 1, h: rescaledFaceVideoHeight },
                     inputs: 'tempface', outputs: 'face'
                 },
                 {
@@ -101,9 +128,9 @@ exports.thumbnail = async (req, res, next) => {
                 },
 
             ])
-
-            .output(editedVideoPath + editedVideoName)
+            .format('mp4')
             .map('output')
+            .output(editedVideoPath + editedVideoName)
             .on("error", function (er) {
                 console.log("error occured: " + er.message);
             })
@@ -116,7 +143,7 @@ exports.thumbnail = async (req, res, next) => {
     }
     if (template.name == "fullscreen") {
         ffmpeg()
-            .input(videoFilePath)
+            .input(filePath + fileName)
             .complexFilter([
                 {
                     filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
@@ -142,7 +169,7 @@ exports.thumbnail = async (req, res, next) => {
         var rescaledFaceVideoWidth = faceVideo.width * widthRatio * template.gamerVideo.width;
         var rescaledFaceVideoHeight = faceVideo.height * heightRatio * template.gamerVideo.height;
         ffmpeg()
-            .input(videoFilePath)
+            .input(filePath + fileName)
             .complexFilter([
                 {
                     filter: 'split', options: 2,

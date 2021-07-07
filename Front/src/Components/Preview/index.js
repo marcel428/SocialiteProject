@@ -13,6 +13,7 @@ import ReactCrop from 'react-image-crop';
 
 import 'react-image-crop/dist/ReactCrop.css';
 import './Preview.css';
+import { get, set, del, clear, keys } from "./../../Service/idb";
 
 
 
@@ -25,6 +26,7 @@ class Preview extends Component {
     state = {
         template: JSON.parse(localStorage.getItem('template')),
         videoFilePath: localStorage.getItem('videoFilePath'),
+        videoFileName: localStorage.getItem('videoFileName'),
         videoWidth: localStorage.getItem('videoWidth'),
         videoHeight: localStorage.getItem('videoHeight'),
         faceVideo: localStorage.getItem('faceVideo') ? JSON.parse(localStorage.getItem('faceVideo')) : null,
@@ -55,28 +57,48 @@ class Preview extends Component {
         totalVideoWidth: '',
         totalVideoHeight: '',
         io: '',
-        progress: 0
+        progress: 1
 
     }
     handleCrop = (crop, percentCrop) => {
         this.setState({ crop })
     }
-    sendSelectedVideo = () => {
+    DataURIToBlob = (dataURI) => {
+        const splitDataURI = dataURI.split(',')
+        const byteString = splitDataURI[0].indexOf('base64') >= 0 ? atob(splitDataURI[1]) : decodeURI(splitDataURI[1])
+        const mimeString = splitDataURI[0].split(':')[1].split(';')[0]
+
+        const ia = new Uint8Array(byteString.length)
+        for (let i = 0; i < byteString.length; i++)
+            ia[i] = byteString.charCodeAt(i)
+
+        return new Blob([ia], { type: mimeString })
+    }
+    sendSelectedVideo = async () => {
         this.setState({
             loading: true
         })
+        var videoBase64 = await get('videoBase64');
+        const file = this.DataURIToBlob(videoBase64);
+
+
+        const formData = new FormData();
+        formData.append('myfile', file, this.state.videoFileName);
+        formData.append('template', localStorage.getItem('template'));
+        formData.append('faceVideo', localStorage.getItem('faceVideo') ? localStorage.getItem('faceVideo') : null);
+        formData.append('mainVideo', localStorage.getItem('mainVideo'));
+
+        const config = {
+            headers: {
+                'content-type': 'multipart/form-data'
+            }
+        };
         this.socket.emit('start', 'progressing is started...');
-        axios
-            .post(
-                `${process.env.REACT_APP_API_URL}/editor/thumbnail`, {
-                videoFilePath: this.state.videoFilePath,
-                template: this.state.template,
-                faceVideo: this.state.faceVideo ? this.state.faceVideo : null,
-                mainVideo: this.state.mainVideo
-            })
+
+        axios.
+            post(`${process.env.REACT_APP_API_URL}/editor/thumbnail`, formData, config)
             .then((res) => {
-                console.log('res')
-                console.log(res)
+
                 this.socket.disconnect();
 
                 this.setState({
@@ -84,7 +106,31 @@ class Preview extends Component {
                     savedVideo: res.data
                 })
 
+            }).catch((error) => {
+                console.log(error)
             });
+
+
+        // axios
+        //     .post(
+        //         `${process.env.REACT_APP_API_URL}/editor/thumbnail`, {
+        //         template: this.state.template,
+        //         faceVideo: this.state.faceVideo ? this.state.faceVideo : null,
+        //         mainVideo: this.state.mainVideo,
+        //         videoBase64,
+        //         videoFileName: this.state.videoFileName
+        //     })
+        //     .then((res) => {
+        //         console.log('res')
+        //         console.log(res)
+        //         this.socket.disconnect();
+
+        //         this.setState({
+        //             progress: 100,
+        //             savedVideo: res.data
+        //         })
+
+        //     });
     }
     goToTemplate = () => {
         this.setState({
@@ -120,7 +166,7 @@ class Preview extends Component {
         }
     }
     componentWillUnmount() {
-        this.socket.disconnect();
+        // this.socket.disconnect();
     }
     setLoading = () => {
         this.setState({
@@ -135,6 +181,7 @@ class Preview extends Component {
         if (this.state.templateRedirect) {
             localStorage.removeItem('faceVideo');
             localStorage.removeItem('mainVideo');
+            localStorage.removeItem('template');
             return <Redirect
                 to={{
                     pathname: `template`
@@ -172,10 +219,19 @@ class Preview extends Component {
 
         *********************************************************************************************************/
         if (prop.template.gamerVideo) {
+            //when selecting the faceVideo using free transfor, we had do add ratio
+            // btw selected facevideo / template face video
+            var templateFaceVideoRatio=
+            (prop.template.mainVideo.height*prop.template.gamerVideo.height)
+            /
+            (prop.template.mainVideo.width*prop.template.gamerVideo.width);
+            var clipVideoRatio=prop.faceVideo.height/prop.faceVideo.width;
+
+            var ratioBtwClipAndTemplate=clipVideoRatio/templateFaceVideoRatio;
             //get ratio btw face clip video and main clip Video
             var faceRatio = displayPreviewWidth * prop.template.gamerVideo.width / prop.faceVideo.width;
             var facePreviewWidth = displayPreviewWidth * prop.template.gamerVideo.width;
-            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.template.gamerVideo.height;
+            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.template.gamerVideo.height*ratioBtwClipAndTemplate;
 
             //zoom the source video by the faceRatio
             var totalFaceVideoWidth = prop.videoWidth * faceRatio;
@@ -195,6 +251,7 @@ class Preview extends Component {
             //get the margin bottom value to fix the face video to the top
 
             var faceMarginBottom = prop.faceVideo.y * faceRatio;
+
 
         }
 
@@ -227,12 +284,13 @@ class Preview extends Component {
 
         //to delete the small gap btw face video and main video
         //cos div has a small margin.
-        var differ = 5;
+        var differ = 0;
         //get the margin bottom value to link the main video to the face video
         if (prop.template.name == "split") {
             var mainMarginBottom = prop.mainVideo.y * mainRatio + (totalFaceVideoHeight - facePreviewHeight) + differ;
         } else
             var mainMarginBottom = prop.mainVideo.y * mainRatio;
+
 
         if (prop.template.name == "smallfacecam" || prop.template.name == "square") {
             faceMarginBottom = prop.faceVideo.y * faceRatio + (totalMainVideoHeight * (1 - prop.template.gamerVideo.y));
@@ -286,8 +344,6 @@ class Preview extends Component {
                 }}
             />
         }
-        console.log('this.state')
-        console.log(this.state)
         return (
             <div>
                 {
@@ -331,11 +387,11 @@ class Preview extends Component {
                                     </Col>
                                 </Row>
                             </div>
-                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden"}} >
+                            <div style={{ maxHeight: totalVideoDivHeight, overflow: "hidden" }} >
                                 {
                                     prop.template.name == "split"
                                         ?
-                                        <div style={{display:"grid"}}>
+                                        <div style={{ display: "grid" }}>
                                             <video
                                                 muted
                                                 ref={this.videoPlayer}
@@ -418,7 +474,7 @@ class Preview extends Component {
                                 {
                                     prop.template.name == "smallfacecam" || prop.template.name == "square"
                                         ?
-                                        <div style={{display:"grid"}}>
+                                        <div style={{ display: "grid" }}>
                                             <video
                                                 muted
                                                 ref={this.videoPlayer_2}

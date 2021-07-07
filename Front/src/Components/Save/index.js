@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { format } from "react-string-format";
 import { Dropdown, DropdownButton } from "react-bootstrap";
+import { get, set, del, clear, keys } from "./../../Service/idb";
 
 
 import ReactCrop from 'react-image-crop';
@@ -25,7 +26,9 @@ class Save extends Component {
         displayPercentInSave: localStorage.getItem('displayPercentInSave'),
         shouldRedirect: false,
         url: null,
-        authed: false
+        authed: false,
+        displayQrcode: false,
+        qrcode: ''
     }
     uploadGoogleDrive = () => {
         axios
@@ -51,6 +54,25 @@ class Save extends Component {
         this.setState({
             shouldRedirect: true
         })
+    }
+    getQrcode = (e) => {
+        e.preventDefault();
+        axios
+            .post(
+                `${process.env.REACT_APP_API_URL}/qrcode/`, {
+                url: `${process.env.REACT_APP_PUBLIC_URL}/editedVideos/${this.state.savedVideo}`
+            })
+            .then((res) => {
+                if (res.data) {
+                    alert('QR code is gernerated successfully!')
+                    this.setState({
+                        displayQrcode: true,
+                        qrcode: res.data
+                    })
+                }
+            }).catch((error) => {
+                console.log(error)
+            });
     }
     componentDidMount() {
         axios
@@ -104,6 +126,7 @@ class Save extends Component {
             if (localStorage.getItem('displayPercentInSave')) {
                 localStorage.removeItem('displayPercentInSave')
             }
+            clear();
 
             return <Redirect
                 to={{
@@ -122,7 +145,7 @@ class Save extends Component {
                             ?
                             <video
                                 muted
-                                playsInline 
+                                playsInline
                                 ref={this.videoPlayer}
                                 onLoadedData={() => {
                                     this.videoPlayer.current.play();
@@ -141,6 +164,13 @@ class Save extends Component {
 
                     <button onClick={this.goToHome}>
                         go to home
+                    </button>
+
+                </div>
+                <div style={{ textAlign: 'center', padding: "0px" }}>
+
+                    <button onClick={(e) => { this.getQrcode(e) }}>
+                        Get QR code
                     </button>
 
                 </div>
@@ -164,6 +194,16 @@ class Save extends Component {
 
                     </DropdownButton>
                 </div>
+                {
+                    this.state.displayQrcode
+                        ?
+                        <div style={{ marginTop: '30px', textAlign: 'center' }}>
+                            <img src={this.state.qrcode}></img>
+                        </div>
+                        :
+                        null
+                }
+
             </div >
 
 

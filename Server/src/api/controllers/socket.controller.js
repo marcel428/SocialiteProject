@@ -37,6 +37,7 @@ io.on("connection", (socket) => {
     interval = setInterval(() => getApiAndEmit(socket), 1000);
   })
   socket.on("disconnect", () => {
+    editor.progressStatus=1;
     console.log("Client disconnected: " + socket.id);
     clearInterval(interval);
   });
@@ -44,5 +45,5 @@ io.on("connection", (socket) => {
 
 const getApiAndEmit = socket => {
   // Emitting a new message. Will be consumed by the client
-  socket.emit("progressStatus", editor.progressStatus);
+  socket.emit("progressStatus", editor.progressStatus?editor.progressStatus:1);
 };

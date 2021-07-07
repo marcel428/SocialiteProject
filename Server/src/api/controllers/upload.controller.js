@@ -23,8 +23,9 @@ const formidable = require('formidable');
 exports.fileUpload = async (req, res) => {
 
     const file = req.files.myfile;
-    console.log('file')
-    console.log(file)
+    console.log('req.body')
+    console.log(req.body)
+
     var rand_no = Date.now();
     const fileName = rand_no + file.name;
     const filePath = path.join(__dirname + './../../public/uploadedVideos/');

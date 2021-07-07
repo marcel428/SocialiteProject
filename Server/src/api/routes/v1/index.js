@@ -9,6 +9,7 @@ const paypalRoutes = require('./paypal.route');
 const membershipRoutes = require('./membership.route');
 const googleDriveRoutes = require('./googleDrive.route');
 const downloadRoutes = require('./download.route');
+const qrcodeRoutes = require('./qrcode.route');
 
 const router = express.Router();
 
@@ -31,5 +32,6 @@ router.use('/paypal', paypalRoutes);
 router.use('/membership', membershipRoutes);
 router.use('/googleDrive', googleDriveRoutes);
 router.use('/download', downloadRoutes);
+router.use('/qrcode', qrcodeRoutes);
 
 module.exports = router;

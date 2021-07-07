@@ -12,6 +12,7 @@
     "axios": "^0.21.1",
     "bootstrap": "^4.1.1",
     "file-saver": "^2.0.5",
+    "idb": "^6.1.2",
     "node-sass": "^6.0.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
