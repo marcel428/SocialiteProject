@@ -1,10 +1,34 @@
 
 const express = require('express');
+const https=require('https');
+const path=require('path');
+const fs=require('fs');
 const app = express();
 const {
   socketPort
 } = require('./../../config/vars');
-const server = app.listen(socketPort);
+
+const User = require('./../models/user.model');
+const editor = require('./editor.controller');
+const logger = require('../../config/logger')
+
+
+
+
+const cert = fs.readFileSync(path.join(__dirname + '../../../ssl/www_socialsgonewild_com.crt'));
+const ca = fs.readFileSync(path.join(__dirname + '../../../ssl/www_socialsgonewild_com.ca-bundle'))
+const key = fs.readFileSync(path.join(__dirname + '../../../ssl/e99214a997d7eaaa9a8dbf852656cd4c.key'));
+
+
+let options = {
+	cert: cert,
+	ca: ca,
+	key: key
+};
+
+const httpsServer = https.createServer(options,app)
+const server =httpsServer.listen(socketPort, '0.0.0.0');
+
 const socketIo = require('socket.io');
 const io = socketIo(server,
   {
@@ -13,13 +37,8 @@ const io = socketIo(server,
     }
   }
 );
-const User = require('./../models/user.model');
-const editor = require('./editor.controller');
-const logger = require('../../config/logger')
-
 
 logger.info("Start socket server: " + socketPort)
-
 
 
 let interval;

@@ -1,0 +1,2 @@
+(this["webpackJsonpui-italy"]=this["webpackJsonpui-italy"]||[]).push([[26],{254:function(t,e,n){"use strict";n.r(e);var i=n(1),r=n(74),c=n(75),u=n(77),a=n(76),o=n(0),s=n(13),l=(n(79),function(t){Object(u.a)(n,t);var e=Object(a.a)(n);function n(t){return Object(r.a)(this,n),e.call(this,t)}return Object(c.a)(n,[{key:"render",value:function(){return Object(i.jsx)("div",{style:{marginTop:"50px",textAlign:"center"},children:"profle"})}}]),n}(o.Component));e.default=Object(s.b)((function(t){return{auth:t.auth}}))(l)}}]);
+//# sourceMappingURL=26.6d79271e.chunk.js.map

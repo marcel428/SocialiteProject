@@ -22,7 +22,7 @@ const templateSchema = new Schema({
         enum: templateLevels,
     },
     gamerVideo:{
-        type:Object
+        type:Array
     },
     mainVideo:{
         type:Object

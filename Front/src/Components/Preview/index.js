@@ -57,7 +57,7 @@ class Preview extends Component {
         totalVideoWidth: '',
         totalVideoHeight: '',
         io: '',
-        progress: 1
+        progress: 1,
 
     }
     handleCrop = (crop, percentCrop) => {
@@ -78,15 +78,23 @@ class Preview extends Component {
         this.setState({
             loading: true
         })
-        var videoBase64 = await get('videoBase64');
-        const file = this.DataURIToBlob(videoBase64);
+        var file;
+        if (localStorage.getItem('videoType') == 'local') {
+            var videoBase64 = await get('videoBase64');
+            file = this.DataURIToBlob(videoBase64);
+        }
+
 
 
         const formData = new FormData();
-        formData.append('myfile', file, this.state.videoFileName);
+        if (localStorage.getItem('videoType') == 'local') {
+            formData.append('myfile', file, this.state.videoFileName);
+        }
         formData.append('template', localStorage.getItem('template'));
         formData.append('faceVideo', localStorage.getItem('faceVideo') ? localStorage.getItem('faceVideo') : null);
         formData.append('mainVideo', localStorage.getItem('mainVideo'));
+        formData.append('videoType', localStorage.getItem('videoType'));
+        formData.append('videoFilePath', localStorage.getItem('videoFilePath'));
 
         const config = {
             headers: {
@@ -178,6 +186,8 @@ class Preview extends Component {
 
 
     render() {
+        console.log('this.state')
+        console.log(this.state)
         if (this.state.templateRedirect) {
             localStorage.removeItem('faceVideo');
             localStorage.removeItem('mainVideo');
@@ -221,17 +231,17 @@ class Preview extends Component {
         if (prop.template.gamerVideo) {
             //when selecting the faceVideo using free transfor, we had do add ratio
             // btw selected facevideo / template face video
-            var templateFaceVideoRatio=
-            (prop.template.mainVideo.height*prop.template.gamerVideo.height)
-            /
-            (prop.template.mainVideo.width*prop.template.gamerVideo.width);
-            var clipVideoRatio=prop.faceVideo.height/prop.faceVideo.width;
+            var templateFaceVideoRatio =
+                (prop.template.mainVideo.height * prop.template.gamerVideo.height)
+                /
+                (prop.template.mainVideo.width * prop.template.gamerVideo.width);
+            var clipVideoRatio = prop.faceVideo.height / prop.faceVideo.width;
 
-            var ratioBtwClipAndTemplate=clipVideoRatio/templateFaceVideoRatio;
+            var ratioBtwClipAndTemplate = clipVideoRatio / templateFaceVideoRatio;
             //get ratio btw face clip video and main clip Video
             var faceRatio = displayPreviewWidth * prop.template.gamerVideo.width / prop.faceVideo.width;
             var facePreviewWidth = displayPreviewWidth * prop.template.gamerVideo.width;
-            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.template.gamerVideo.height*ratioBtwClipAndTemplate;
+            var facePreviewHeight = displayPreviewWidth * sourceRatio * prop.template.gamerVideo.height * ratioBtwClipAndTemplate;
 
             //zoom the source video by the faceRatio
             var totalFaceVideoWidth = prop.videoWidth * faceRatio;

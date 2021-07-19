@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://src/Components/FaceEdit/FaceEdit.css"],"names":[],"mappings":"AAAA,KACI,mBAAoB,CACpB,WAAY,CACZ,iBACJ","file":"9.0c964f4f.chunk.css","sourcesContent":[".row{\r\n    width: 70%!important;\r\n    margin: auto;\r\n    text-align: center;\r\n}"]}

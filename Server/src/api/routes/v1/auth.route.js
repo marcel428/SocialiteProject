@@ -86,7 +86,16 @@ router.route('/verify-email/:token')
 router.route('/verify-sms')
   .post(controller.verifySMS);
 
+  router.route('/send-code')
+  .post( controller.sendCode);
 
+  router.route('/verify-code')
+  .post( controller.verifyCode);
 
+  router.route('/resend-code')
+  .post( controller.resendCode);
+
+  router.route('/reset-password')
+  .post( controller.resetPassword);
 
 module.exports = router;

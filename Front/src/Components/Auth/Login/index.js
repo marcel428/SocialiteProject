@@ -182,6 +182,11 @@ class Login extends Component {
                     }
 
                 </div>
+                <div style={{marginTop:'20px'}}>
+                <Link to="/forgot-password">
+                       Forgot Password?
+                   </Link>
+                </div>
                <div style={{marginTop:"20px"}}>
                    <button onClick={()=>{this.login()}}>
                        Login

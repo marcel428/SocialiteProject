@@ -22,12 +22,12 @@ const roles = ['Admin', 'Dr', 'SuperAdmin'];
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    // required: true,
     trim: true,
   },
   email: {
     type: String,
-    required: true,
+    // required: true,
     unique: true,
     trim: true,
     lowercase: true,
@@ -81,7 +81,7 @@ userSchema.pre('save', async function save(next) {
 userSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id','name','balance','membership', 'createdAt'];
+    const fields = ['id','name','email','balance','membership', 'createdAt'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];

@@ -40,6 +40,8 @@ class Template extends Component {
         })
     }
     goToEdit = (item) => {
+        console.log('item')
+        console.log(item)
         this.setState({
             shouldRedirect: true,
             selectedTmp: item
@@ -47,16 +49,22 @@ class Template extends Component {
     }
 
     render() {
-        console.log('this.props')
-        console.log(this.props)
-        console.log('this.state')
-        console.log(this.state)
-
         if (this.state.shouldRedirect) {
-            localStorage.setItem('template', JSON.stringify(this.state.selectedTmp));
+            console.log('this.state')
+            console.log(this.state)
+            if (this.state.selectedTmp.gamerVideo.length == 0) {
+                const template = {
+                    ...this.state.selectedTmp,
+                    gamerVideo: null
+                }
+                localStorage.setItem('template', JSON.stringify(template));
+            } else {
+                console.log('sss')
+                localStorage.setItem('template', JSON.stringify(this.state.selectedTmp));
+            }
             return <Redirect
                 to={{
-                    pathname: this.state.selectedTmp.gamerVideo ? 'face-edit' : 'main-edit',
+                    pathname: this.state.selectedTmp.gamerVideo && this.state.selectedTmp.gamerVideo.length > 0 ? 'face-edit' : 'main-edit',
                 }} />
         }
 
@@ -68,7 +76,7 @@ class Template extends Component {
                         this.state.templates && this.state.templates
                             ?
                             this.state.templates.map((item, idx) => (
-                                <Col xs="4" style={{ textAlign: 'center', backgroundColor: 'white',marginTop:"40px" }} key={item._id}>
+                                <Col xs="4" style={{ textAlign: 'center', backgroundColor: 'white', marginTop: "40px" }} key={item._id}>
                                     <div style={{ padding: "10px" }}>
                                         <div>
                                             <span style={{ marginRight: '10px' }}>{item.name}</span>
@@ -88,7 +96,7 @@ class Template extends Component {
                                         }}
                                     >
                                     </video>
-                                    
+
                                     <div>
                                         {item.description}
                                     </div>
@@ -96,7 +104,7 @@ class Template extends Component {
                                         this.state.linkKey[idx]
                                             ?
                                             <div style={{ textAlign: 'center' }}>
-                                                <button onClick={()=>this.goToEdit(item)}>
+                                                <button onClick={() => this.goToEdit(item)}>
                                                     Select Template
                                                 </button>
 

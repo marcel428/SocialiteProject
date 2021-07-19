@@ -8,13 +8,25 @@ router
   .route('/')
   .post(controller.fileUpload);
 router
-  .route('/youtube/:clipUrl')
-  .get(controller.youtube);
+  .route('/youtube')
+  .post(controller.youtube);
 router
   .route('/fb')
-  .post(controller.fb);
+  .get(controller.fb);
 router
   .route('/twitch')
   .post(controller.twitch);
+
+  router
+  .route('/fromTwitch')
+  .get(controller.fromTwitch);
+
+  router
+  .route('/fromFacebook')
+  .get(controller.fromFacebook);
+
+  router
+  .route('/fromYoutube')
+  .get(controller.fromYoutube);
 
 module.exports = router;

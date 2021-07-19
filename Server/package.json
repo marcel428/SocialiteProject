@@ -94,7 +94,9 @@
     "googleapis": "^39.2.0",
     "got": "^11.8.2",
     "helmet": "^3.5.0",
+    "http": "0.0.1-security",
     "http-status": "^1.0.1",
+    "https": "^1.0.0",
     "joi": "^10.4.1",
     "jwt-simple": "0.5.6",
     "lodash": "^4.17.4",
@@ -113,11 +115,13 @@
     "pug": "^2.0.4",
     "puppeteer": "^5.4.1",
     "qrcode": "^1.4.4",
+    "query-string": "^7.0.1",
     "react-redux": "^7.2.4",
     "socket.io": "^4.0.1",
     "twilio": "^3.45.0",
     "uuid": "^3.1.0",
     "winston": "^3.1.0",
+    "youtube-dl-exec": "^1.2.4",
     "ytdl-core": "^4.8.2"
   },
   "devDependencies": {
@@ -135,6 +139,7 @@
     "opn-cli": "^5.0.0",
     "sinon": "^7.5.0",
     "sinon-chai": "^3.0.0",
-    "supertest": "^4.0.2"
+    "supertest": "^4.0.2",
+    "webpack-dev-server": "^2.9.7"
   }
 }

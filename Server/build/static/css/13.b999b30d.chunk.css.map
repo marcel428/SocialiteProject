@@ -1,1 +1,0 @@
-{"version":3,"sources":["webpack://src/Components/MainEdit/MainEdit.css"],"names":[],"mappings":"AAAA,KACI,mBAAoB,CACpB,WAAY,CACZ,iBACJ","file":"13.b999b30d.chunk.css","sourcesContent":[".row{\r\n    width: 70%!important;\r\n    margin: auto;\r\n    text-align: center;\r\n}"]}

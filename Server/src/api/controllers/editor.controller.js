@@ -9,6 +9,7 @@ const Culqi = require('culqi-node');
 const APIError = require('../utils/APIError');
 var ffmpeg = require('fluent-ffmpeg');
 const editly = require('editly');
+const https = require('https');
 
 ffmpeg.setFfmpegPath('C:/ffmpeg/bin/ffmpeg.exe');
 const ffmpegOnProgress = require('ffmpeg-on-progress')
@@ -27,35 +28,31 @@ var progressStatus = 0;
  * @public
  */
 exports.youtube = async (req, res, next) => {
-    try {
-        const videoPath = path.join(__dirname + './../../public/videos/');
-        const videoUrl = "https://www.youtube.com/watch?v=2IW5gFKdsvw";
-        // Create WriteableStream
-        const writeableStream = fs.createWriteStream(`yt-video.mp4`);
+  return  res.redirect(`https://id.twitch.tv/oauth2/authorize?response_type=token&client_id=${process.env.TWITCH_CLIENT_ID}&redirect_uri=${process.env.TWITCH_REDIRECT_URL}`)
 
-        // Listening for the 'finish' event
-        writeableStream.on('finish', () => {
-            console.log(`yt-video downloaded successfully`);
-        });
-
-        ytdl(videoUrl, {
-            format: "mp4",
-        }).pipe(writeableStream);
-    } catch (error) {
-        return next(error);
-    }
 };
 exports.thumbnail = async (req, res, next) => {
 
-    //FIRST file uploading
 
-    const file = req.files.myfile;
 
-    var rand_no = Date.now();
-    const fileName = rand_no + file.name;
-    const filePath = path.join(__dirname + './../../public/uploadedVideos/');
 
-    var uploading = await file.mv(filePath + fileName);
+    var toBeEdited = '';
+
+    if (req.body.videoType == 'local') {
+        //when request contains localfile, FIRST file uploading
+        const file = req.files.myfile;
+        var rand_no = Date.now();
+        const fileName = rand_no + file.name;
+        const filePath = path.join(__dirname + './../../public/uploadedVideos/');
+
+
+        var uploading = await file.mv(filePath + fileName);
+        toBeEdited = filePath + fileName;
+    }
+    if (req.body.videoType == 'tt') {
+        toBeEdited = req.body.videoFilePath;
+    }
+
 
 
     //AFTER UPLOADING, edit video...
@@ -66,7 +63,7 @@ exports.thumbnail = async (req, res, next) => {
     const logProgress = (progress, event) => {
         // progress is a floating point number from 0 to 1
         console.log('progress', event.percent);
-        exports.progressStatus = Math.floor(event.percent?event.percent:1);
+        exports.progressStatus = Math.floor(event.percent ? event.percent : 1);
     }
 
     const template = JSON.parse(req.body.template);
@@ -77,30 +74,31 @@ exports.thumbnail = async (req, res, next) => {
     const editedVideoPath = path.join(__dirname + './../../public/editedVideos/');
     const editedVideoName = Date.now() + 'Edited.mp4';
 
-    if (template.name == 'split') {     
+    if (template.name == 'split') {
         //when selecting the faceVideo using free transfor, we had do add ratio
         // btw selected facevideo / template face video
 
-        var templateFaceVideoRatio=
-        (template.mainVideo.height*template.gamerVideo.height)
-        /
-        (template.mainVideo.width*template.gamerVideo.width);
-        var clipVideoRatio=faceVideo.height/faceVideo.width;
+        var templateFaceVideoRatio =
+            (template.mainVideo.height * template.gamerVideo.height)
+            /
+            (template.mainVideo.width * template.gamerVideo.width);
+        var clipVideoRatio = faceVideo.height / faceVideo.width;
 
-        var ratioBtwClipAndTemplate=clipVideoRatio/templateFaceVideoRatio;
+        var ratioBtwClipAndTemplate = clipVideoRatio / templateFaceVideoRatio;
 
         //******************************* */
 
         var padding = mainVideo.height / (1 - template.gamerVideo.height);
         var increasedPadding = padding - mainVideo.height;
 
-        var heightRatio = 1 / (1 - (template.gamerVideo.height*(ratioBtwClipAndTemplate<1?ratioBtwClipAndTemplate:1)));
+        var heightRatio = 1 / (1 - (template.gamerVideo.height * (ratioBtwClipAndTemplate < 1 ? ratioBtwClipAndTemplate : 1)));
 
         var ratio = mainVideo.width / faceVideo.width;
         var rescaledFaceVideoWidth = mainVideo.width;
         var rescaledFaceVideoHeight = faceVideo.height * ratio;
         ffmpeg()
-            .input(filePath + fileName)
+            .input(toBeEdited)
+            .outputOptions(['-map 0:a']) //merging audio
             .complexFilter([
                 {
                     filter: 'split', options: 2,
@@ -143,7 +141,8 @@ exports.thumbnail = async (req, res, next) => {
     }
     if (template.name == "fullscreen") {
         ffmpeg()
-            .input(filePath + fileName)
+            .input(toBeEdited)
+            .outputOptions(['-map 0:a']) //merging audio
             .complexFilter([
                 {
                     filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
@@ -169,11 +168,12 @@ exports.thumbnail = async (req, res, next) => {
         var rescaledFaceVideoWidth = faceVideo.width * widthRatio * template.gamerVideo.width;
         var rescaledFaceVideoHeight = faceVideo.height * heightRatio * template.gamerVideo.height;
         ffmpeg()
-            .input(filePath + fileName)
+            .input(toBeEdited)
+            .outputOptions(['-map 0:a']) //merging audio
             .complexFilter([
                 {
                     filter: 'split', options: 2,
-                    outputs: ['a', 'b']
+                    inputs: '0:v', outputs: ['a', 'b']
                 },
                 {
                     filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
@@ -193,9 +193,9 @@ exports.thumbnail = async (req, res, next) => {
                 },
 
             ])
-
             .output(editedVideoPath + editedVideoName)
             .map('output')
+
             .on("error", function (er) {
                 console.log("error occured: " + er.message);
             })

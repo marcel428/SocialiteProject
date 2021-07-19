@@ -11,11 +11,14 @@ import ReactCrop from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 import './FaceEdit.css';
 
+const displayVideoCol = 10;
+const colPercent = 0.98;
+
 class Edit extends Component {
     constructor(props) {
         super(props);
         this.videoPlayer = React.createRef();
-
+        this.totalDiv = React.createRef()
     }
     state = {
 
@@ -34,15 +37,20 @@ class Edit extends Component {
         },
         shouldRedirect: false,
         faceVideoRatio: null,
-        templateRedirect: false
+        templateRedirect: false,
+        disToRealRatio: 1,
+        gamerVideo: JSON.parse(localStorage.getItem('template')).gamerVideo[0],
+        _16_9faceKey: false,
+        _4_3faceKey: true,
+        freeTransformKey: false,
     }
     handleCrop = (crop, percentCrop) => {
-      //when the selected faceVideo ratio is the same as with mainVideo ratio * 0.7(limited value),
-      //stop increasing the ratio
-        var diffBtwTemplateAndCrop=0.7;
-        var mainRatio=this.state.template.mainVideo.height/this.state.template.mainVideo.width;
-        var selectedRatio=crop.height/crop.width;
-        if(selectedRatio>mainRatio*diffBtwTemplateAndCrop){
+        //when the selected faceVideo ratio is the same as with mainVideo ratio * 0.7(limited value),
+        //stop increasing the ratio
+        var diffBtwTemplateAndCrop = 0.7;
+        var mainRatio = this.state.template.mainVideo.height / this.state.template.mainVideo.width;
+        var selectedRatio = crop.height / crop.width;
+        if (selectedRatio > mainRatio * diffBtwTemplateAndCrop) {
             return;
         }
 
@@ -63,64 +71,117 @@ class Edit extends Component {
         })
     }
     _4_3Facecam = () => {
-        this.initialCrop();
+        const gamerVideo = JSON.parse(localStorage.getItem('template')).gamerVideo[1];
+        this.setState({
+            _16_9faceKey: true,
+            _4_3faceKey: false,
+            freeTransformKey: false,
+            gamerVideo
+        })
+    }
+    _16_9Facecam = () => {
+        const gamerVideo = JSON.parse(localStorage.getItem('template')).gamerVideo[0];
+        this.setState({
+            _16_9faceKey: false,
+            _4_3faceKey: true,
+            freeTransformKey: false,
+            gamerVideo
+        })
     }
     freeTransform = () => {
+        this.freeInitialCrop();
+    }
+    componentDidUpdate(prevProps, prevState) {
+        console.log('this.state');
+        console.log(this.state);
+        if (this.state.gamerVideo.name != prevState.gamerVideo.name) {
+            this.initialCrop();
+        }
+    }
+    componentDidMount() {
+        if(this.state.template.name=='split')
+        this.initialCrop();
+        else if(this.state.template.name="square")
+        this.freeInitialCrop()
+    }
+    initialCrop = () => {
+        //get the width of total div
+        var disToRealRatio = this.totalDiv.current.offsetWidth * (10 / 12) / localStorage.getItem('videoWidth');
+
+        this.setState({
+            disToRealRatio
+        })
         var divide = 3;
-        var state=this.state;
-        var crop={
-            unit:'px',
-            width:state.videoWidth/divide,
-            height:state.videoHeight/divide,
-            x:(state.videoWidth-state.videoWidth/divide)/2,
-            y:(state.videoHeight-state.videoHeight/divide)/2
+        var prop = this.state;
+        const videoRatio = prop.videoHeight / prop.videoWidth;
+
+        const faceVideoRatio = prop.template.mainVideo.height * prop.gamerVideo.height / (prop.template.mainVideo.width * prop.gamerVideo.width);
+
+        var crop = {};
+        if (faceVideoRatio < videoRatio) {
+            crop = {
+                unit: 'px',
+                width: (prop.videoWidth / divide) * disToRealRatio,
+                height: (prop.videoWidth * faceVideoRatio / divide) * disToRealRatio,
+                aspect: 1 / faceVideoRatio,
+                x: ((prop.videoWidth - (prop.videoWidth / divide)) / 2) * disToRealRatio,
+                y: ((prop.videoHeight - (prop.videoWidth * faceVideoRatio / divide)) / 2) * disToRealRatio
+            }
+        } else {
+            crop = {
+                unit: 'px',
+                width: (prop.videoHeight / faceVideoRatio / divide) * disToRealRatio,
+                height: (prop.videoHeight / divide) * disToRealRatio,
+                aspect: 1 / faceVideoRatio,
+                x: ((prop.videoWidth - (prop.videoHeight / faceVideoRatio / divide)) / 2) * disToRealRatio,
+                y: ((prop.videoHeight - (prop.videoHeight / divide)) / 2) * disToRealRatio
+            }
+
         }
         this.setState({
             crop
         })
     }
-    componentDidMount() {
-        this.initialCrop();
-    }
-    initialCrop = () => {
+    freeInitialCrop = () => {
+        //get the width of total div
+        var disToRealRatio = this.totalDiv.current.offsetWidth * (10 / 12) / localStorage.getItem('videoWidth');
+        this.setState({
+        })
         var divide = 3;
         var prop = this.state;
         const videoRatio = prop.videoHeight / prop.videoWidth;
 
-        const faceVideoRatio = prop.template.mainVideo.height * prop.template.gamerVideo.height / (prop.template.mainVideo.width * prop.template.gamerVideo.width);
+        const faceVideoRatio = prop.template.mainVideo.height * prop.gamerVideo.height / (prop.template.mainVideo.width * prop.gamerVideo.width);
 
         var crop = {};
         if (faceVideoRatio < videoRatio) {
-            console.log('sdf')
             crop = {
                 unit: 'px',
-                width: prop.videoWidth / divide,
-                height: prop.videoWidth * faceVideoRatio / divide,
-                aspect: 1 / faceVideoRatio,
-                x: (prop.videoWidth - (prop.videoWidth / divide)) / 2,
-                y: (prop.videoHeight - (prop.videoWidth * faceVideoRatio / divide)) / 2
+                width: (prop.videoWidth / divide) * disToRealRatio,
+                height: (prop.videoWidth * faceVideoRatio / divide) * disToRealRatio,
+                x: ((prop.videoWidth - (prop.videoWidth / divide)) / 2) * disToRealRatio,
+                y: ((prop.videoHeight - (prop.videoWidth * faceVideoRatio / divide)) / 2) * disToRealRatio
             }
         } else {
-            console.log('wer')
             crop = {
                 unit: 'px',
-                width: prop.videoHeight / faceVideoRatio / divide,
-                height: prop.videoHeight / divide,
-                aspect: 1 / faceVideoRatio,
-                x: (prop.videoWidth - (prop.videoHeight / faceVideoRatio / divide)) / 2,
-                y: (prop.videoHeight - (prop.videoHeight / divide)) / 2
+                width: (prop.videoHeight / faceVideoRatio / divide) * disToRealRatio,
+                height: (prop.videoHeight / divide) * disToRealRatio,
+                x: ((prop.videoWidth - (prop.videoHeight / faceVideoRatio / divide)) / 2) * disToRealRatio,
+                y: ((prop.videoHeight - (prop.videoHeight / divide)) / 2) * disToRealRatio
             }
 
         }
         this.setState({
+            disToRealRatio,
+            freeTransformKey: true,
             crop
         })
     }
 
 
     render() {
-        console.log('this.state')
-        console.log(this.state)
+
         if (this.state.templateRedirect) {
             localStorage.removeItem('template');
             return <Redirect
@@ -130,7 +191,59 @@ class Edit extends Component {
         }
 
         if (this.state.shouldRedirect) {
-            localStorage.setItem('faceVideo', JSON.stringify(this.state.crop));
+            const faceVideoCrop = {
+                width: this.state.crop.width / this.state.disToRealRatio,
+                height: this.state.crop.height / this.state.disToRealRatio,
+                x: this.state.crop.x / this.state.disToRealRatio,
+                y: this.state.crop.y / this.state.disToRealRatio,
+            }
+
+            localStorage.setItem('faceVideo', JSON.stringify(faceVideoCrop));
+            localStorage.setItem('selectedFaceVideo', JSON.stringify(this.state.crop));
+
+
+            //when the template name is 'split'
+            if (this.state.template.name == "split") {
+                //when user click the freetransform button..
+                if (this.state.freeTransformKey) {
+
+                    console.log('sdfsdfsdf');
+                    const selectedRatio = this.state.crop.height / this.state.crop.width;
+                    const gamerHeight = selectedRatio * (this.state.template.mainVideo.width / this.state.template.mainVideo.height);
+                    console.log('gamerHeight')
+                    console.log(gamerHeight)
+                    const gamerVideo = {
+                        width: 1,
+                        height: gamerHeight,
+                        x: 0,
+                        y: 0
+                    }
+                    const template = {
+                        ...this.state.template,
+                        gamerVideo
+                    }
+                    console.log('template')
+                    console.log(template)
+                    localStorage.removeItem('template');
+                    localStorage.setItem('template', JSON.stringify(template));
+                }
+                else { //when user clicks the 16:9 or 4:3 ratio button..
+                    const template = {
+                        ...this.state.template,
+                        gamerVideo: this.state.gamerVideo
+                    }
+                    localStorage.setItem('template', JSON.stringify(template));
+                }
+            }
+
+            //when the template is 'square'..
+            if (this.state.template.name == 'square') {
+                const template = {
+                    ...this.state.template,
+                    gamerVideo: this.state.gamerVideo
+                }
+                localStorage.setItem('template', JSON.stringify(template));
+            }
             return <Redirect
                 to={{
                     pathname: `main-edit`
@@ -138,57 +251,67 @@ class Edit extends Component {
         }
         return (
             <div>
-                <div>
-                    <Row>
-                        <Col>
-                            <span>Select Facecam&nbsp;&nbsp;</span>
-                            <input type="checkbox" checked={true} readOnly />
-                        </Col>
-                        <Col>
-                            <span>Select gamefeed&nbsp;&nbsp;</span>
-                            <input type="checkbox" value={1} disabled="disabled" />
-                        </Col>
-                        <Col>
-                            <span>Preview&nbsp;&nbsp;</span>
-                            <input type="checkbox" value={1} disabled="disabled" />
-                        </Col>
-                    </Row>
-                </div>
-
-
-                <div style={{ textAlign: 'center', paddingTop: '50px' }}>
-                    <ReactCrop
-                        crop={this.state.crop}
-                        keepSelection={true}
-                        onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
-                        renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
-                </div>
-                {
-                    this.state.template.name == "split" || this.state.template.name == "square"
-                        ?
-                        <div style={{ marginTop: "20px" }}>
-                            <button onClick={this._4_3Facecam}>
-                                4:3 facecam
-                            </button>
-                            <button style={{ marginLeft: '20px' }} onClick={this.freeTransform}>
-                                free transform
-                            </button>
+                <Row ref={this.totalDiv} style={{ width: "100%" }}>
+                    <Col md={10} style={{ padding: '0px' }}>
+                        <div style={{ textAlign: 'center' }}>
+                            <ReactCrop
+                                style={{ width: '100%' }}
+                                crop={this.state.crop}
+                                keepSelection={true}
+                                onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
+                                renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
                         </div>
-                        :
-                        null
-                }
+                    </Col>
+                    <Col md={2}>
+                        {
+                            this.state.template.name == "split"
+                                ?
+                                <div style={{ marginTop: "20px" }}>
+                                    {
+                                        this.state._16_9faceKey
+                                            ?
+                                            <button onClick={this._16_9Facecam}>
+                                                16:9 facecam
+                                            </button>
+                                            : null
+                                    }
+                                    {
+                                        this.state._4_3faceKey
+                                            ?
+                                            <button onClick={this._4_3Facecam}>
+                                                4:3 facecam
+                                            </button>
+                                            : null
+                                    }
+                                    <button onClick={this.freeTransform}>
+                                        free transform
+                                    </button>
+                                </div>
+                                :
+                                null
+                        }
 
-                <div style={{ marginTop: '30px', marginBottom: "30px", textAlign: 'center' }}>
-                    <button onClick={this.goToMain}>
-                        Done
-                    </button>
+                        <Row style={{ width: '100%' }}>
+                            <Col md={7}>
+                                <button onClick={this.goToTemplate}>
+                                    Change Template
+                                </button>
+                            </Col>
+                            <Col md={5}>
+                                <button onClick={this.goToMain}>
+                                    Done
+                                </button>
+                            </Col>
+                        </Row>
 
-                </div>
-                <div>
-                    <button onClick={this.goToTemplate}>
-                        Change Template
-                    </button>
-                </div>
+                    </Col>
+                </Row>
+
+
+
+
+
+
             </div>
 
 
@@ -206,7 +329,7 @@ const videoComponent = (props, videoPlayer) => (
         muted
         onLoadedData={() => videoPlayer.current.play()}
         loop
-        style={{ display: 'block', maxWidth: '100%' }}
+        style={{ display: 'block', width: '100%' }}
         onLoadStart={e => {
             // You must inform ReactCrop when your media has loaded.
             e.target.dispatchEvent(new Event('medialoaded', { bubbles: true }));

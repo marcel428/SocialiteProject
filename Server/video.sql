@@ -1,7 +1,7 @@
 /*
  Navicat Premium Data Transfer
 
- Source Server         : mongo
+ Source Server         : localhost
  Source Server Type    : MongoDB
  Source Server Version : 40406
  Source Host           : localhost:27017
@@ -11,7 +11,7 @@
  Target Server Version : 40406
  File Encoding         : 65001
 
- Date: 11/06/2021 21:24:11
+ Date: 19/07/2021 11:06:07
 */
 
 
@@ -62,8 +62,8 @@ db.getCollection("admins").insert([ {
     phoneNumber: "+8613124260482",
     password: "$2a$10$tGZjn68Z7yVBiQCmN0gnTuJKSmmWtsVO/rDMsPz4mUSHwAqPdv7IK",
     role: "SuperAdmin",
-    createdAt: ISODate("2021-06-09T09:25:36Z"),
-    updatedAt: ISODate("2021-06-09T09:25:36Z"),
+    createdAt: ISODate("2021-06-09T09:25:36.000Z"),
+    updatedAt: ISODate("2021-06-09T09:25:36.000Z"),
     __v: NumberInt("0")
 } ]);
 db.getCollection("admins").insert([ {
@@ -78,8 +78,8 @@ db.getCollection("admins").insert([ {
     phoneNumber: "+51955037779",
     password: "$2a$10$D68wz/6yVf8VWO8ielZcLe8KZ399hPLocBi3JsvEB4QvRK6bi/NUW",
     role: "SuperAdmin",
-    createdAt: ISODate("2021-06-09T09:25:36Z"),
-    updatedAt: ISODate("2021-06-09T09:25:36Z"),
+    createdAt: ISODate("2021-06-09T09:25:36.000Z"),
+    updatedAt: ISODate("2021-06-09T09:25:36.000Z"),
     __v: NumberInt("0")
 } ]);
 db.getCollection("admins").insert([ {
@@ -94,8 +94,8 @@ db.getCollection("admins").insert([ {
     phoneNumber: "+51955037770",
     password: "$2a$10$vBJIauaYAQE6u1.B4UyeF.vIY0HKYvX8zNsjeV2m4lggHxLm5pjLC",
     role: "Admin",
-    createdAt: ISODate("2021-06-09T09:25:36Z"),
-    updatedAt: ISODate("2021-06-09T09:25:36Z"),
+    createdAt: ISODate("2021-06-09T09:25:36.000Z"),
+    updatedAt: ISODate("2021-06-09T09:25:36.000Z"),
     __v: NumberInt("0")
 } ]);
 
@@ -157,47 +157,66 @@ db.createCollection("templates");
 // ----------------------------
 db.getCollection("templates").insert([ {
     _id: ObjectId("60c08802055800001b001be5"),
-    name: "first",
+    name: "split",
     exampleVideo: "template_1.mp4",
     description: "This is a first template",
     level: "free",
-    gamerVideo: {
-        x: 0,
-        y: 0,
-        width: 1,
-        height: 0.3
-    },
+    gamerVideo: [
+        {
+            name: "_16_9",
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 0.3
+        },
+        {
+            name: "_4_3",
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 0.42
+        },
+        {
+            name: "free",
+            x: 0,
+            y: 0,
+            width: 1,
+            height: 0.3
+        }
+    ],
     mainVideo: {
-        width: 700,
-        height: 1200
-    }
-} ]);
-db.getCollection("templates").insert([ {
-    _id: ObjectId("60c08806055800001b001be6"),
-    name: "second",
-    exampleVideo: "template_2.mp4",
-    description: "This is a second template",
-    level: "free",
-    gamerVideo: {
-        x: 0,
-        y: 0,
-        width: 1,
-        height: 0.2
-    },
-    mainVideo: {
-        width: 600,
-        height: 1000
+        width: 9,
+        height: 16
     }
 } ]);
 db.getCollection("templates").insert([ {
     _id: ObjectId("60c08830055800001b001be7"),
-    name: "third",
+    name: "fullscreen",
+    exampleVideo: "template_2.mp4",
+    description: "This is a 2nd template",
+    level: "free",
+    mainVideo: {
+        width: 9,
+        height: 16
+    }
+} ]);
+db.getCollection("templates").insert([ {
+    _id: ObjectId("60f55662776900009d0035a2"),
+    name: "square",
     exampleVideo: "template_3.mp4",
     description: "This is a 3rd template",
-    level: "premium",
+    level: "free",
+    gamerVideo: [
+        {
+            x: 0.3,
+            y: 0,
+            width: 0.4,
+            height: 0.25
+        }
+    ],
     mainVideo: {
-        width: 600,
-        height: 1000
+        width: 1,
+        height: 1
     }
 } ]);
 

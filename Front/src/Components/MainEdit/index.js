@@ -15,6 +15,8 @@ class Edit extends Component {
     constructor(props) {
         super(props);
         this.videoPlayer = React.createRef();
+        this.totalDiv = React.createRef()
+
     }
     state = {
 
@@ -34,7 +36,9 @@ class Edit extends Component {
         shouldRedirect: false,
         previewVideo: '',
         loading: false,
-        templateRedirect: false
+        templateRedirect: false,
+        disToRealRatio: 1
+
 
     }
     handleCrop = (crop, percentCrop) => {
@@ -53,6 +57,12 @@ class Edit extends Component {
     }
 
     componentDidMount() {
+        var disToRealRatio = this.totalDiv.current.offsetWidth * (10 / 12) / localStorage.getItem('videoWidth');
+
+        this.setState({
+            disToRealRatio
+        })
+
         var divide = 3;
         var prop = this.state;
         const videoRatio = prop.videoHeight / prop.videoWidth;
@@ -65,24 +75,22 @@ class Edit extends Component {
 
         var crop = {};
         if (mainVideoRatio < videoRatio) {
-            console.log('sdf')
             crop = {
                 unit: 'px',
-                width: prop.videoWidth / divide,
-                height: prop.videoWidth * mainVideoRatio / divide,
+                width: prop.videoWidth * disToRealRatio,
+                height: prop.videoWidth * mainVideoRatio * disToRealRatio,
                 aspect: 1 / mainVideoRatio,
-                x: (prop.videoWidth - (prop.videoWidth / divide)) / 2,
-                y: (prop.videoHeight - (prop.videoWidth * mainVideoRatio / divide)) / 2
+                x: 0,
+                y: ((prop.videoHeight - (prop.videoWidth * mainVideoRatio)) / 2) * disToRealRatio
             }
         } else {
-            console.log('wer')
             crop = {
                 unit: 'px',
-                width: prop.videoHeight / mainVideoRatio / divide,
-                height: prop.videoHeight / divide,
+                width: prop.videoHeight / mainVideoRatio * disToRealRatio,
+                height: prop.videoHeight * disToRealRatio,
                 aspect: 1 / mainVideoRatio,
-                x: (prop.videoWidth - (prop.videoHeight / mainVideoRatio / divide)) / 2,
-                y: (prop.videoHeight - (prop.videoHeight / divide)) / 2
+                x: ((prop.videoWidth - (prop.videoHeight / mainVideoRatio)) / 2) * disToRealRatio,
+                y: 0
             }
 
         }
@@ -96,7 +104,7 @@ class Edit extends Component {
     render() {
         if (this.state.templateRedirect) {
             localStorage.removeItem('template');
-            if(localStorage.getItem('faceVideo')){
+            if (localStorage.getItem('faceVideo')) {
                 localStorage.removeItem('faceVideo');
             }
             return <Redirect
@@ -106,7 +114,15 @@ class Edit extends Component {
         }
 
         if (this.state.shouldRedirect) {
-            localStorage.setItem('mainVideo', JSON.stringify(this.state.crop));
+            const mainVideoCrop = {
+                width: this.state.crop.width / this.state.disToRealRatio,
+                height: this.state.crop.height / this.state.disToRealRatio,
+                x: this.state.crop.x / this.state.disToRealRatio,
+                y: this.state.crop.y / this.state.disToRealRatio,
+            }
+
+            localStorage.setItem('mainVideo', JSON.stringify(mainVideoCrop));
+            localStorage.setItem('selectedMainVideo', JSON.stringify(this.state.crop));
             return <Redirect
                 to={{
                     pathname: `preview`
@@ -125,58 +141,31 @@ class Edit extends Component {
                         </div>
                         :
                         <div>
-                            <div>
-                                <Row>
-                                    <Col>
-                                        {
-                                            this.state.template && this.state.template.gamerVideo
-                                                ?
-                                                <div>
-                                                    <span>Select Facecam&nbsp;&nbsp;</span>
-                                                    <input type="checkbox" checked value={1} readOnly />
-                                                </div>
-                                                :
-                                                null
-                                        }
+                            <Row ref={this.totalDiv} style={{ width: "100%" }}>
+                                <Col md={10} style={{ padding: '0px' }}>
+                                    <div style={{ textAlign: 'center' }}>
+                                        <ReactCrop
+                                            style={{ width: '100%' }}
+                                            crop={this.state.crop}
+                                            keepSelection={true}
+                                            onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
+                                            renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
+                                    </div>
+                                </Col>
+                                <Col md={2}>
+                                    <div style={{ marginTop: '30px', marginBottom: "30px", textAlign: 'center' }}>
+                                        <button onClick={this.goToPreview}>
+                                            Preview
+                                        </button>
 
-                                    </Col>
-                                    <Col>
-                                        {
-                                            this.state.template && this.state.template.mainVideo
-                                                ?
-                                                <div>
-                                                    <span>Select gamefeed&nbsp;&nbsp;</span>
-                                                    <input type="checkbox" checked value={1} readOnly />
-                                                </div>
-                                                :
-                                                null
-                                        }
-                                    </Col>
-                                    <Col>
-                                        <span>Preview&nbsp;&nbsp;</span>
-                                        <input type="checkbox" defaultChecked={false} />
-                                    </Col>
-                                </Row>
-                            </div>
-
-                            <div style={{ textAlign: 'center', paddingTop: '50px' }}>
-                                <ReactCrop
-                                    crop={this.state.crop}
-                                    keepSelection={true}
-                                    onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
-                                    renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
-                            </div>
-                            <div style={{ marginTop: '30px', marginBottom: "30px", textAlign: 'center' }}>
-                                <button onClick={this.goToPreview}>
-                                    Preview
-                                </button>
-
-                            </div>
-                            <div>
-                                <button onClick={this.goToTemplate}>
-                                    Change Template
-                                </button>
-                            </div>
+                                    </div>
+                                    <div>
+                                        <button onClick={this.goToTemplate}>
+                                            Change Template
+                                        </button>
+                                    </div>
+                                </Col>
+                            </Row>
 
                         </div>
                 }
@@ -199,7 +188,7 @@ const videoComponent = (props, videoPlayer) => (
         onLoadedData={() => videoPlayer.current.play()}
         muted
         loop
-        style={{ display: 'block', maxWidth: '100%' }}
+        style={{ display: 'block', width: '100%' }}
         onLoadStart={e => {
             // You must inform ReactCrop when your media has loaded.
             e.target.dispatchEvent(new Event('medialoaded', { bubbles: true }));

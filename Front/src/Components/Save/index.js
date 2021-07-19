@@ -117,6 +117,9 @@ class Save extends Component {
             if (localStorage.getItem('videoFilePath')) {
                 localStorage.removeItem('videoFilePath')
             }
+            if (localStorage.getItem('videoType')) {
+                localStorage.removeItem('videoType')
+            }
             if (localStorage.getItem('videoHeight')) {
                 localStorage.removeItem('videoHeight')
             }

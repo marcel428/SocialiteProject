@@ -63,7 +63,7 @@ exports.callback = async (req, res) => {
                 oAuth2Client.setCredentials(tokens);
                 authed = true;
                 await fileUpload(oAuth2Client, uploadedFileName)
-                res.redirect(process.env.BASE_WEB_URL);
+                res.redirect(process.env.BASE_URL);
             }
         });
     }

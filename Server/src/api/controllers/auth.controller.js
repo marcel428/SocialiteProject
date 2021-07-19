@@ -1,15 +1,16 @@
 const httpStatus = require('http-status');
 const User = require('../models/user.model');
 const Admin = require('../models/admin.model');
+const EmailOtp = require('../models/emailOtp.model');
 const RefreshToken = require('../models/refreshToken.model');
 const moment = require('moment-timezone');
-const { jwtExpirationInterval } = require('../../config/vars');
+const { env, jwtExpirationInterval } = require('../../config/vars');
 const { baseWebUrl } = require('../../config/vars');
 const Culqi = require('culqi-node');
 const { culqiConfing } = require('../../config/vars');
 const bcrypt = require('bcryptjs');
 const jwt = require('jwt-simple');
-
+const nodemailer = require('nodemailer');
 
 /**
  * Returns a formated object with tokens
@@ -36,13 +37,13 @@ exports.register = async (req, res) => {
     console.log('sdf');
     console.log(req.body)
     const userData = req.body;
-    if(userData.email)
+    if (userData.email)
 
-    var existEmail=await User.findOne({email:userData.email});
+      var existEmail = await User.findOne({ email: userData.email });
 
-    if(existEmail){
+    if (existEmail) {
       return res.json({ error: 'email is duplicated', status: httpStatus.CONFLICT });
-    }else{
+    } else {
       const user = await new User(userData).save();
       const userTransformed = user.transform();
       const token = user.token();
@@ -63,15 +64,15 @@ exports.login = async (req, res, next) => {
     const { email, password } = req.body;
     // validate
     if (!email || !password)
-    return res.json({ error: 'Not all fields have been entered.', status: httpStatus.BAD_REQUEST });
+      return res.json({ error: 'Not all fields have been entered.', status: httpStatus.BAD_REQUEST });
 
     const user = await User.findOne({ email: email });
     if (!user)
-    return res.json({ error: 'No account with this email has been registered.', status: httpStatus.BAD_REQUEST });
+      return res.json({ error: 'No account with this email has been registered.', status: httpStatus.BAD_REQUEST });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) 
-    return res.json({ error: 'Invalid credentials.', status: httpStatus.BAD_REQUEST });
+    if (!isMatch)
+      return res.json({ error: 'Invalid credentials.', status: httpStatus.BAD_REQUEST });
 
     const token = user.token();
     console.log('token')
@@ -128,4 +129,129 @@ exports.verifySMS = async (req, res, next) => {
     return next(e);
   }
 };
+
+exports.sendCode = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const code = Math.floor(Math.random() * 1000000);
+
+    var transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'samjose0294@gmail.com',
+        pass: 'ktr1117KTR'
+      }
+    });
+
+    var mailOptions = {
+      from: 'samjose0294@gmail.com',
+      to: email,
+      subject: 'Please check your verification code',
+      text: 'Verification code: ' + code
+    };
+
+    transporter.sendMail(mailOptions, async function (error, info) {
+      if (error) {
+        console.log(error);
+      } else {
+        console.log('Email sent: ' + info.response);
+        const emailOtp = await new EmailOtp({
+          otp: code
+        }).save();
+        res.status(200).json(info.response)
+      }
+    });
+
+  } catch (e) {
+    return next(e);
+  }
+};
+
+exports.verifyCode = async (req, res, next) => {
+  try {
+    const code = req.body.code;
+    var otp = await EmailOtp.findOne({ otp: code });
+    if (otp) {
+      var dlt = await EmailOtp.findOneAndDelete({ otp: code });
+      if (dlt) {
+        res.json({ message: 'success', status: httpStatus.OK })
+      } else {
+        res.json({ error: 'Invalid OTP', status: httpStatus.INTERNAL_SERVER_ERROR })
+      }
+    } else {
+      res.json({ error: 'Invalid OTP', status: httpStatus.INTERNAL_SERVER_ERROR })
+    }
+  } catch (e) {
+    return next(e);
+  }
+};
+
+exports.resendCode = async (req, res, next) => {
+  try {
+    const email = req.body.email;
+    const user = await User.findOne({ email });
+    if (user) {
+      const code = Math.floor(Math.random() * 1000000);
+
+      var transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+          user: 'samjose0294@gmail.com',
+          pass: 'ktr1117KTR'
+        }
+      });
+
+      var mailOptions = {
+        from: 'samjose0294@gmail.com',
+        to: email,
+        subject: 'Please check your verification code',
+        text: 'Verification code: ' + code
+      };
+
+      transporter.sendMail(mailOptions, async function (error, info) {
+        if (error) {
+          console.log(error);
+        } else {
+          console.log('Email sent: ' + info.response);
+          const emailOtp = await new EmailOtp({
+            otp: code
+          }).save();
+          res.json({ message: info.response, status: httpStatus.OK })
+        }
+      });
+    } else {
+      res.json({ error: 'non existed user!', status: httpStatus.INTERNAL_SERVER_ERROR })
+    }
+  } catch (e) {
+    return next(e);
+  }
+};
+
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const userData = req.body;
+    if (userData.email)
+
+      var existEmail = await User.findOne({ email: userData.email });
+
+    if (existEmail) {
+      const rounds = env === 'test' ? 1 : 10;
+      const hash = await bcrypt.hash(userData.password, rounds);
+      var updateUser = await User.findOneAndUpdate({ email: userData.email }, { password: hash });
+      const userTransformed = updateUser.transform();
+      const token = updateUser.token();
+      return res.json({ token, user: userTransformed, status: httpStatus.CREATED });
+
+    } else {
+      return res.json({ error: 'There is no such email!', status: httpStatus.CONFLICT });
+    }
+
+
+  } catch (error) {
+    console.log("register:", error);
+  }
+};
+
+
 

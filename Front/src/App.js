@@ -25,7 +25,6 @@ function App() {
   return (
     <Suspense fallback={<div>Loading... </div>}>
       <Provider store={store}>
-        <Header />
         <Routes />
       </Provider>
     </Suspense>
