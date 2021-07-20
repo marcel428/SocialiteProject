@@ -98,7 +98,7 @@ exports.thumbnail = async (req, res, next) => {
         var rescaledFaceVideoHeight = faceVideo.height * ratio;
         ffmpeg()
             .input(toBeEdited)
-            .outputOptions(['-map 0:a']) //merging audio
+            .outputOptions(['-map 0:a?']) //merging audio
             .complexFilter([
                 {
                     filter: 'split', options: 2,
@@ -142,7 +142,7 @@ exports.thumbnail = async (req, res, next) => {
     if (template.name == "fullscreen") {
         ffmpeg()
             .input(toBeEdited)
-            .outputOptions(['-map 0:a']) //merging audio
+            .outputOptions(['-map 0:a?']) //merging audio
             .complexFilter([
                 {
                     filter: "crop", options: { w: mainVideo.width, h: mainVideo.height, x: mainVideo.x, y: mainVideo.y },
@@ -169,7 +169,7 @@ exports.thumbnail = async (req, res, next) => {
         var rescaledFaceVideoHeight = faceVideo.height * heightRatio * template.gamerVideo.height;
         ffmpeg()
             .input(toBeEdited)
-            .outputOptions(['-map 0:a']) //merging audio
+            .outputOptions(['-map 0:a?']) //merging audio
             .complexFilter([
                 {
                     filter: 'split', options: 2,
