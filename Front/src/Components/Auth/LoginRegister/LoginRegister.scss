@@ -1,0 +1,26 @@
+.authmodal {
+  &__title {
+    line-height: 64px;
+  }
+
+  &__close {
+    top: 40px;
+    right: 40px
+  }
+
+  &__line {
+    hr {
+      height: 0;
+      border-top: 1px solid #1A203D0D;
+
+      & ~ span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 0 10px;
+      }
+    }
+  }
+}

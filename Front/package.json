@@ -3,17 +3,18 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@craco/craco": "^6.2.0",
     "@fortawesome/fontawesome-svg-core": "^1.2.32",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@fortawesome/react-fontawesome": "^0.1.14",
+    "@headlessui/react": "^1.3.0",
+    "@heroicons/react": "^1.0.3",
     "@testing-library/jest-dom": "^5.11.6",
     "@testing-library/react": "^11.2.2",
     "@testing-library/user-event": "^12.6.0",
     "axios": "^0.21.1",
-    "bootstrap": "^4.1.1",
     "file-saver": "^2.0.5",
     "idb": "^6.1.2",
-    "node-sass": "^6.0.0",
     "react": "^17.0.1",
     "react-bootstrap": "^1.4.0",
     "react-countdown": "^2.3.1",
@@ -28,19 +29,22 @@
     "react-redux": "^7.2.4",
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
+    "react-router-hash-link": "^2.4.3",
     "react-scripts": "4.0.1",
     "react-string-format": "^0.1.0",
     "react-toastify": "^6.2.0",
     "react-twitch-embed-video": "^3.0.0",
     "react-youtube": "^7.13.1",
     "reactstrap": "^8.9.0",
+    "sass": "^1.36.0",
+    "sass-loader": "^12.1.0",
     "socket.io-client": "^4.0.1",
     "web-vitals": "^0.2.4"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -60,5 +64,12 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "@iconify-icons/fa-brands": "^1.1.0",
+    "@iconify/react": "^1.1.4",
+    "autoprefixer": "^9.8.6",
+    "postcss": "^7.0.36",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.7"
   }
 }

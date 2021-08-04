@@ -1,0 +1,95 @@
+.account {
+    &__effect {
+        background: linear-gradient(281.9deg, rgba(255, 255, 255, 0.58) 28.09%, rgba(255, 255, 255, 0) 100.43%);
+        opacity: 0.15;
+
+        &-first {
+            height: 550px;
+            clip-path: polygon(0 0, 0 25%, 100% 100%, 100% 0);
+            width: 60%;
+        }
+
+        &-second {
+            height: 745px;
+            clip-path: polygon(0 0, 0 20%, 100% 100%, 100% 0);
+            width: 85%;
+        }
+    }
+
+    .container {
+        padding-top: 115px;
+        padding-bottom: 108px;
+    }
+
+    &__info {
+
+        padding: 57px 50px 47px;
+
+        &_back {
+            top: 35px;
+            left: 50px;
+        }
+
+        h2 {
+            font-size: 38px;
+            line-height: 64px;
+        }
+
+        &_description {
+            line-height: 37px;
+        }
+
+        hr {
+            width: calc(100% + 100px);
+            margin-left: -50px;
+            border: 1px solid rgba(12, 14, 27, 0.05);
+            margin-bottom: 50px;
+        }
+
+        &_settings {
+            &_icon {
+                border: 1px solid rgba(21, 16, 51, 0.05);
+                border-radius: 10px;
+            }
+
+            &_edit {
+                border-radius: 10px;
+            }
+        }
+
+        &_action {
+            button {
+                min-width: 250px;
+            }
+            & > button:first-child {
+                background: linear-gradient(238.1deg, rgba(255, 147, 147, 0.15) 6.94%, rgba(232, 95, 95, 0.15) 99.96%);
+                color: #E85F5F;
+            }
+            & > button:last-child {
+                background: linear-gradient(238.1deg, #FF9393 6.94%, #E85F5F 99.96%);
+            }
+        }
+    }
+
+    &__subscription {
+        padding: 50px 50px 40px;
+
+        h2 {
+            font-size: 41px;
+            line-height: 64px;
+
+            span {
+                font-size: 20px;
+            }
+        }
+
+        button {
+            background: linear-gradient(238.1deg, #FF9393 6.94%, #E85F5F 99.96%);
+
+        }
+    }
+
+    &__method {
+        padding: 50px;
+    }
+}

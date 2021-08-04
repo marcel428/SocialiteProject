@@ -1,0 +1,96 @@
+.aboutusbanner {
+    &__effect {
+        background: linear-gradient(281.9deg, rgba(255, 255, 255, 0.58) 28.09%, rgba(255, 255, 255, 0) 100.43%);
+        z-index: 10;
+        opacity: 0.15;
+
+        &-first {
+            height: 550px;
+            clip-path: polygon(0 0, 0 25%, 100% 100%, 100% 0);
+            width: 60%;
+            right: 0;
+        }
+
+        &-second {
+            height: 745px;
+            clip-path: polygon(0 0, 0 20%, 100% 100%, 100% 0);
+            width: 85%;
+            right: 0;
+        }
+    }
+
+    &__background {
+        height: 850px;
+    }
+
+    &__detail {
+        padding-top: 218px;
+        max-width: 762px;
+
+        h1 {
+            line-height: 64px;
+
+            & ~ p {
+                line-height: 33px;
+            }
+        }
+    }
+
+    &__videoplay {
+        background: rgba(255, 255, 255, 0.15);
+        margin-top: 120px;
+        max-width: 861px;
+    }
+}
+
+.team {
+    padding-top: 150px;
+
+    h2 {
+        line-height: 64px;
+
+        & ~ p {
+            line-height: 33px;
+            max-width: 683px;
+            margin-bottom: 60px;
+        }
+    }
+
+    &__detail {
+        border-radius: 10px;
+        padding-left: 20px;
+        background: rgba(88, 165, 255, 0.85);
+        box-shadow: 0 4px 23px rgba(19, 21, 35, 0.05);
+
+        h3 {
+            font-size: 22px;
+            line-height: 33px;
+        }
+
+        p {
+            line-height: 27px;
+        }
+
+        span {
+            line-height: 33px;
+        }
+    }
+}
+
+.aboutusbottom {
+    margin-top: 100px;
+    margin-bottom: 87px;
+    padding-top: 30px;
+    padding-bottom: 44px;
+    box-shadow: 0 5px 35px rgba(24, 29, 70, 0.05);
+
+    h2 {
+        font-size: 38px;
+        line-height: 64px;
+    }
+
+    p {
+        line-height: 30px;
+        max-width: 579px;
+    }
+}

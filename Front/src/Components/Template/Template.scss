@@ -1,0 +1,38 @@
+.template {
+    padding-top: 260px;
+
+    h1 {
+        line-height: 64px;
+        max-width: 400px;
+    }
+
+    p {
+        line-height: 37px;
+        max-width: 800px;
+    }
+
+    &__item {
+        border-radius: 17px;
+
+        video {
+            //height: 301px;
+        }
+
+        h3 {
+            font-size: 28px;
+            line-height: 43px;
+        }
+
+        p {
+            line-height: 31px;
+        }
+
+        div {
+            padding-bottom: 30px;
+        }
+
+        button {
+            min-width: 194px;
+        }
+    }
+}

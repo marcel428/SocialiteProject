@@ -49,7 +49,7 @@ exports.callback = async (req, res) => {
                     method: 'get',
                     url: urlForGetUser,
                     params: {
-                        fields: ['id', 'email', 'first_name', 'last_name'].join(','),
+                        fields: ['id', 'name','short_name', 'email', 'first_name', 'last_name'].join(','),
                         access_token:res1.data.access_token,
                       },
                 })
@@ -58,19 +58,22 @@ exports.callback = async (req, res) => {
                         console.log('res2.data')
                         console.log(res2.data)
 
-                        try {
-                            console.log('sdf');
-                            console.log(req.body)
+                        try {                            
                             const userData = res2.data;
                             if (userData.email)
                                 var existEmail = await User.findOne({ email: userData.email });
                             var user;
-                            if (existEmail) {
-                                user = await User.findOneAndUpdate({ email: userData.email }, { password: res1.data.access_token });
-                            } else {
+                            if (existEmail) {                                
+                                user = await User.findOneAndUpdate(
+                                    {email: userData.email }, 
+                                    {password: res1.data.access_token},
+                                    {name: userData.name}
+                                );
+                            } else {                                
                                 user = await new User({
                                     email: userData.email,
-                                    password: res1.data.access_token
+                                    password: res1.data.access_token,
+                                    name: userData.name
                                 }).save();
                                 //   return res.json({ token, user: userTransformed, status: httpStatus.CREATED });
                             }

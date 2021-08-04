@@ -1,0 +1,37 @@
+.priceWidget {
+    padding: 46px 40px 30px;
+    max-width: 360px;
+
+    &:nth-child(2) {
+        border: 1px solid rgba(12, 14, 27, 0.05);
+        box-shadow: 0 5px 35px rgba(24, 29, 70, 0.05);
+
+        @screen md {
+            margin-left: 50px;
+        }
+
+        & > p:nth-child(3) {
+            line-height: 23px;
+        }
+
+        button {
+            border: 1px solid rgba(92, 128, 255, 0.2);
+        }
+    }
+
+    & > p:nth-child(2) {
+        & > span {
+            line-height: 64px;
+        }
+        & > span:first-child {
+            font-size: 40px;
+        }
+        & > span:last-child {
+            font-size: 20px;
+        }
+    }
+
+    & > p:nth-child(3) {
+        line-height: 45px;
+    }
+}

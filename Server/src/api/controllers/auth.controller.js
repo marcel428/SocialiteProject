@@ -33,23 +33,25 @@ function generateTokenResponse(user, accessToken) {
  * @public
  */
 exports.register = async (req, res) => {
-  try {
-    console.log('sdf');
+  try {    
     console.log(req.body)
     const userData = req.body;
     if (userData.email)
-
       var existEmail = await User.findOne({ email: userData.email });
 
-    if (existEmail) {
+    if (existEmail) {      
       return res.json({ error: 'email is duplicated', status: httpStatus.CONFLICT });
-    } else {
-      const user = await new User(userData).save();
+    } else {      
+      const user = await new User({
+          email: userData.email,
+          name: userData.name,
+          password: userData.password
+      }).save();
+
       const userTransformed = user.transform();
-      const token = user.token();
+      const token = user.token();      
       return res.json({ token, user: userTransformed, status: httpStatus.CREATED });
     }
-
   } catch (error) {
     console.log("register:", error);
   }
@@ -131,6 +133,10 @@ exports.verifySMS = async (req, res, next) => {
 };
 
 exports.sendCode = async (req, res, next) => {
+
+  // res.status(200).json("test");
+  // return;
+
   try {
     const email = req.body.email;
     const code = Math.floor(Math.random() * 1000000);
@@ -138,13 +144,13 @@ exports.sendCode = async (req, res, next) => {
     var transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'samjose0294@gmail.com',
-        pass: 'ktr1117KTR'
+        user: 'socialsgonewild@gmail.com',
+        pass: 'Reneizshort1214!'
       }
     });
 
     var mailOptions = {
-      from: 'samjose0294@gmail.com',
+      from: 'socialsgonewild@gmail.com',
       to: email,
       subject: 'Please check your verification code',
       text: 'Verification code: ' + code
@@ -168,6 +174,9 @@ exports.sendCode = async (req, res, next) => {
 };
 
 exports.verifyCode = async (req, res, next) => {
+
+  // res.json({ message: 'success', status: httpStatus.OK })
+  // return;
   try {
     const code = req.body.code;
     var otp = await EmailOtp.findOne({ otp: code });
@@ -196,13 +205,13 @@ exports.resendCode = async (req, res, next) => {
       var transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-          user: 'samjose0294@gmail.com',
-          pass: 'ktr1117KTR'
+          user: 'socialsgonewild@gmail.com',
+          pass: 'Reneizshort1214!'
         }
       });
 
       var mailOptions = {
-        from: 'samjose0294@gmail.com',
+        from: 'socialsgonewild@gmail.com',
         to: email,
         subject: 'Please check your verification code',
         text: 'Verification code: ' + code

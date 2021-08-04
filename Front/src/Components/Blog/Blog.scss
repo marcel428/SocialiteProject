@@ -1,0 +1,50 @@
+.blog {
+    &__banner {
+        margin-bottom: 104px;
+
+        h1 {
+            font-size: 47px;
+            line-height: 64px;
+        }
+
+        p {
+            max-width: 545px;
+            line-height: 37px;
+        }
+    }
+
+    &__categories {
+        &-active {
+            background: #0C0E1B !important;
+        }
+
+        div {
+            background: rgba(255, 255, 255, 0.2);
+        }
+    }
+
+    &__item {
+        border-radius: 17px;
+
+        & > img {
+            height: 291px;
+        }
+
+        div {
+            max-width: 430px;
+        }
+
+        h3 {
+            font-size: 28px;
+            line-height: 43px;
+        }
+
+        p {
+            line-height: 31px;
+        }
+
+        a {
+            line-height: 33px;
+        }
+    }
+}

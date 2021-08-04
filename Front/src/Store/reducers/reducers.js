@@ -1,11 +1,17 @@
-import { SAVE_AUTH_INFO, CHANGE_MEMBERSHIP, CHANGE_BALANCE } from "../constants"
-var user=localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')):null ;
+import {
+    SAVE_AUTH_INFO,
+    CHANGE_MEMBERSHIP,
+    CHANGE_BALANCE
+} from "../constants";
+
+let user=localStorage.getItem('user')? JSON.parse(localStorage.getItem('user')) : null;
+
 const initialState = {
     user,
     token: localStorage.getItem('token')
 };
+
 const authReducer = (state = initialState, action) => {
-    // console.log(action, "action = = = = = = === = = = = === = = = = =")
 
     switch (action.type) {
         case SAVE_AUTH_INFO:

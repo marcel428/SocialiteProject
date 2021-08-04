@@ -57,17 +57,21 @@ exports.callback = async (req, res) => {
                         console.log('res2.data.data')
                         console.log(res2.data.data)
 
-                        try {
-                            console.log('sdf');
+                        try {                            
                             console.log(req.body)
                             const userData = res2.data.data[0];
                             if (userData.login)
-                                var existName = await User.findOne({ name: userData.login });
+                                var existName = await User.findOne({ email: userData.email });
                             var user;
-                            if (existName) {
-                                user = await User.findOneAndUpdate({ name: userData.login }, { password: res1.data.access_token });
-                            } else {
+                            if (existName) {                                
+                                user = await User.findOneAndUpdate(
+                                        { name: userData.login }, 
+                                        { password: res1.data.access_token },
+                                        {email: userData.email}
+                                    );
+                            } else {                                
                                 user = await new User({
+                                    email: userData.email,
                                     name: userData.login,
                                     password: res1.data.access_token
                                 }).save();

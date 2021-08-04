@@ -1,0 +1,23 @@
+.chooseplan {
+    &__back {
+        top: 8px;
+        left: 8px;
+
+        @screen lg {
+            top: 70px;
+            left: 64px;
+        }
+    }
+
+    &__title {
+        max-width: 100%;
+
+        @screen lg {
+            max-width: 248px;
+        }
+
+        h1 {
+            line-height: 64px;
+        }
+    }
+}

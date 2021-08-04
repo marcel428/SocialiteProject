@@ -1,0 +1,38 @@
+.nav {
+  min-height: 72px;
+  .logo {
+    letter-spacing: 6px;
+  }
+  &__right {
+    width: 100%;
+    top: 72px;
+    left: 0;
+    padding: 16px;
+    background-color: #58A5FF;
+
+    @screen md {
+      width: unset;
+      top: 0;
+      background-color: transparent;
+    }
+
+    &_loginEmail {
+      border: 1px solid rgba(12, 14, 27, 0.05);
+      box-shadow: 0 5px 35px rgba(24, 29, 70, 0.05);
+    }
+
+    &_line {
+      height: 0;
+      border-top: 1px solid #1A203D0D;
+
+      & ~ span {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        background: white;
+        padding: 0 10px;
+      }
+    }
+  }
+}
