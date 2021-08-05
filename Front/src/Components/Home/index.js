@@ -423,14 +423,29 @@ class Home extends Component {
                                 >
                                 </video>
                             </div>
-                                // :
-                                // <div className="relative">
-                                //     <div className="absolute top-1/2 left-1/2 transform -translate-x-2/4 -translate-y-2/4 cursor-pointer">
-                                //         <img src={videoPlay} alt="Video Play Icon"/>
-                                //     </div>
-                                //     <img  src={videoBackImage} alt="Video Play Background Image"/>
-                                // </div>
                         }
+
+
+                        {
+                            this.state.videoFilePath
+                            ?
+                            <div style={{marginTop:'20px',textAlign:'center'}}>
+                            <button 
+                            className="font-manrope-semibold w-48 text-base text-white bg-green ml-4 px-14 py-4 rounded-full"
+                            type="button"
+                            onClick={()=>{this.goTemplatePage()}}>
+                                Continue
+                            </button>
+                            </div>
+                            :
+                            null
+                        }
+                       
+                
+
+
+
+                        
                     </div>
                 </div>
 

@@ -73,7 +73,7 @@ class Template extends Component {
                             this.state.templates.map((item, idx) => (
                                 <div className="overflow-hidden mx-4 md:mx-0 template__item" key={item._id}>
                                     <video
-                                        className="w-full"
+                                        className="w-full template_video"                                        
                                         autoPlay
                                         controls
                                         src={`${process.env.REACT_APP_PUBLIC_URL}/template/${item.exampleVideo}`}

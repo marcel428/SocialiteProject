@@ -250,71 +250,99 @@ class Edit extends Component {
                 }} />
         }
         return (
-            <div>
-                <Row ref={this.totalDiv} style={{ width: "100%" }}>
-                    <Col md={10} style={{ padding: '0px' }}>
-                        <div style={{ textAlign: 'center' }}>
-                            <ReactCrop
-                                style={{ width: '100%' }}
-                                crop={this.state.crop}
-                                keepSelection={true}
-                                onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
-                                renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
-                        </div>
-                    </Col>
-                    <Col md={2}>
-                        {
-                            this.state.template.name == "split"
-                                ?
-                                <div style={{ marginTop: "20px" }}>
-                                    {
-                                        this.state._16_9faceKey
-                                            ?
-                                            <button onClick={this._16_9Facecam}>
-                                                16:9 facecam
-                                            </button>
-                                            : null
-                                    }
-                                    {
-                                        this.state._4_3faceKey
-                                            ?
-                                            <button onClick={this._4_3Facecam}>
-                                                4:3 facecam
-                                            </button>
-                                            : null
-                                    }
-                                    <button onClick={this.freeTransform}>
-                                        free transform
+            <div className="bg-white hero">
+                <div className="absolute right-0 hero__effect hero__effect-first" />
+                <div className="absolute right-0 hero__effect hero__effect-second" />
+                <div className="absolute top-0 left-0 w-full bg-primary hero__background" />
+
+                <div className="relative flex flex-col items-center mx-auto z-10 hero__section">
+                    <div className="relative flex w-full  ">
+                        <button
+                            className="font-manrope-normal w-1/6 text-sm flex flex-row justify-center text-white bg-blue py-4 rounded-full"
+                            type="button"
+                            onClick={this.freeTransform}
+                        >
+                            free transform
+                        </button>
+
+                        <button
+                            className="font-manrope-normal w-1/6 text-sm flex flex-row justify-center text-white bg-blue py-4 rounded-full"
+                            type="button"
+                            onClick={this.freeTransform}
+                        >
+                            free transform
+                        </button>
+
+                        <button
+                            className="font-manrope-normal w-1/6 text-sm flex flex-row justify-center text-white bg-blue py-4 rounded-full"
+                            type="button"
+                            onClick={this.freeTransform}
+                        >
+                            free transform
+                        </button>
+
+
+                    </div>
+                    
+
+                    <Row ref={this.totalDiv} style={{ width: "100%" }}>
+                        <Col md={10} style={{ padding: '0px' }}>
+                            <div style={{ textAlign: 'center' }}>
+                                <ReactCrop
+                                    style={{ width: '100%' }}
+                                    crop={this.state.crop}
+                                    keepSelection={true}
+                                    onChange={(crop, percentCrop) => { this.handleCrop(crop, percentCrop) }}
+                                    renderComponent={videoComponent(this.state.videoFilePath, this.videoPlayer)} />
+                            </div>
+                        </Col>
+                        <Col md={2}>
+                            {
+                                this.state.template.name == "split"
+                                    ?
+                                    <div style={{ marginTop: "20px" }}>
+                                        {
+                                            this.state._16_9faceKey
+                                                ?
+                                                <button onClick={this._16_9Facecam}>
+                                                    16:9 facecam
+                                                </button>
+                                                : null
+                                        }
+                                        {
+                                            this.state._4_3faceKey
+                                                ?
+                                                <button onClick={this._4_3Facecam}>
+                                                    4:3 facecam
+                                                </button>
+                                                : null
+                                        }
+                                        <button onClick={this.freeTransform}>
+                                            free transform
+                                        </button>
+                                    </div>
+                                    :
+                                    null
+                            }
+
+                            <Row style={{ width: '100%' }}>
+                                <Col md={7}>
+                                    <button onClick={this.goToTemplate}>
+                                        Change Template
                                     </button>
-                                </div>
-                                :
-                                null
-                        }
+                                </Col>
+                                <Col md={5}>
+                                    <button onClick={this.goToMain}>
+                                        Done
+                                    </button>
+                                </Col>
+                            </Row>
 
-                        <Row style={{ width: '100%' }}>
-                            <Col md={7}>
-                                <button onClick={this.goToTemplate}>
-                                    Change Template
-                                </button>
-                            </Col>
-                            <Col md={5}>
-                                <button onClick={this.goToMain}>
-                                    Done
-                                </button>
-                            </Col>
-                        </Row>
-
-                    </Col>
-                </Row>
-
-
-
-
-
+                        </Col>
+                    </Row>
+                </div>
 
             </div>
-
-
 
         )
     }

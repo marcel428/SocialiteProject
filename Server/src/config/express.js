@@ -44,10 +44,10 @@ app.use(cors({ credentials: false, origin: true }));
 app.use('/uploads', express.static(path.join(__dirname, "./../public/")));
 
 
-app.use(express.static(path.join(__dirname, "./../../build/")));
+app.use(express.static(path.join(__dirname, "./../../build1/")));
 
 app.get('/', function (req, res) {
-    res.sendFile(path.join(__dirname, './../../build', 'index.html'));
+    res.sendFile(path.join(__dirname, './../../build1', 'index.html'));
   });
 // enable authentication
 app.use(passport.initialize());

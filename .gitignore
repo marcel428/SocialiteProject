@@ -74,3 +74,8 @@ typings/
 
 # FuseBox cache
 .fusebox/
+Front-old
+Server/src/public/editedVideos/
+Server/src/public/uploadedVideos/
+Server/build1/
+Server/build/
